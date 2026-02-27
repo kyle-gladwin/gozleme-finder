@@ -30,6 +30,13 @@ const ANTHROPIC_KEY     = process.env.ANTHROPIC_KEY     || '';
 
 // ── Middleware ──────────────────────────────────────────────────────────────
 app.use(cors());
+// Force HTTPS in production
+app.use((req, res, next) => {
+  if (process.env.NODE_ENV === 'production' && req.headers['x-forwarded-proto'] !== 'https') {
+    return res.redirect(301, 'https://' + req.host + req.url);
+  }
+  next();
+});
 app.use(express.json());
 
 // Serve static files
