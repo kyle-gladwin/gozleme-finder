@@ -1,0 +1,12 @@
+[
+  {
+    "name": "Sultan Kitchen",
+    "address": "56 Hoe St, Walthamstow, London E17 4PG",
+    "area": "Walthamstow",
+    "lat": 51.5837,
+    "lng": -0.0194,
+    "description": "Neighbourhood Turkish kitchen on Hoe Street serving gözleme alongside a full menu of home-cooked Turkish dishes.",
+    "tags": ["turkish", "gozleme", "walthamstow"],
+    "mapsUrl": "https://www.google.com/maps/place/Sultan+Kitchen/@51.5837148,-0.0194669,92m/"
+  }
+]

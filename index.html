@@ -90,6 +90,16 @@
     font-size: 16px; color: var(--ink); outline: none; transition: border-color 0.2s;
   }
   .search-input:focus { border-color: var(--terracotta); }
+  .search-input-wrap { position: relative; flex: 1; min-width: 200px; }
+  .search-input-wrap .search-input { width: 100%; min-width: 0; padding-right: 36px; }
+  .clear-btn {
+    position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; cursor: pointer; color: #b09a88;
+    font-size: 16px; line-height: 1; padding: 0 2px;
+    display: none; transition: color 0.15s;
+  }
+  .clear-btn:hover { color: var(--terracotta); }
+  .clear-btn.visible { display: block; }
   .search-btn {
     padding: 12px 28px; background: var(--terracotta); color: white; border: none;
     border-radius: 2px; font-family: 'DM Mono', monospace; font-size: 12px;
@@ -139,28 +149,15 @@
   .source-tab:hover { border-color: var(--terracotta); color: var(--terracotta); }
   .source-tab.active { background: var(--ink); border-color: var(--ink); color: white; }
 
-  /* ── Two-column layout: map + list ── */
-  .results-body {
-    display: grid;
-    grid-template-columns: 1fr 400px;
-    gap: 20px;
-    align-items: start;
-  }
-
-  @media (max-width: 800px) {
-    .results-body { grid-template-columns: 1fr; }
-    .map-panel { order: -1; }  /* map on top on mobile */
-  }
-
-  /* ── Map panel ── */
-  .map-panel {
-    position: sticky;
-    top: 20px;
+  /* ── Full-width map above results ── */
+  .map-section {
+    width: 100%;
+    margin-bottom: 28px;
   }
 
   .map-container {
     width: 100%;
-    height: 520px;
+    height: 460px;
     border-radius: 2px;
     border: 1px solid var(--smoke);
     overflow: hidden;
@@ -182,6 +179,9 @@
     padding: 24px;
     line-height: 1.8;
   }
+
+  /* ── Results body: cards only ── */
+  .results-body { display: block; }
 
   /* ── Cards list ── */
   .card-list { display: flex; flex-direction: column; gap: 12px; }
@@ -241,9 +241,14 @@
   .source-badge { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; padding: 2px 6px; border-radius: 2px; border: 1px solid; }
   .source-badge.places { color: var(--places-blue); border-color: rgba(26,115,232,0.3); background: rgba(26,115,232,0.06); }
   .source-badge.ai     { color: var(--terracotta);  border-color: rgba(201,81,42,0.3);  background: rgba(201,81,42,0.06); }
+  .source-badge.review { color: var(--accent);      border-color: rgba(42,107,92,0.3);  background: rgba(42,107,92,0.06); }
+  .card.source-review::before   { background: var(--accent); }
+  .source-badge.curated { color: var(--gold);        border-color: rgba(212,160,23,0.4);  background: rgba(212,160,23,0.08); }
+  .card.source-curated::before  { background: var(--gold); }
 
   .card-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; min-width: 60px; }
   .card-area { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: #8a7060; text-align: right; }
+  .card-dist { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--accent); font-weight: 500; text-align: right; }
   .maps-link {
     padding: 5px 10px; border: 1.5px solid var(--terracotta); color: var(--terracotta);
     text-decoration: none; border-radius: 2px; font-family: 'DM Mono', monospace;
@@ -283,9 +288,12 @@
   <div class="search-section">
     <label class="search-label">Search Location</label>
     <div class="search-row">
-      <input type="text" class="search-input" id="locationInput"
-             placeholder="e.g. Hackney, Stoke Newington, Northeast London..."
-             value="Northeast London">
+      <div class="search-input-wrap">
+        <input type="text" class="search-input" id="locationInput"
+               placeholder="Enter postcode or location here..."
+               oninput="toggleClearBtn()">
+        <button class="clear-btn" id="clearBtn" onclick="clearSearch()" title="Clear">&#x2715;</button>
+      </div>
       <button class="search-btn" id="searchBtn" onclick="searchGozleme()">Search</button>
     </div>
   </div>
@@ -304,6 +312,16 @@
   <!-- Error -->
   <div class="error" id="error"></div>
 
+  <!-- Full-width map — always visible, centred on London by default -->
+  <div class="map-section">
+    <div class="map-container" id="mapContainer">
+      <div class="map-no-key" id="mapNoKey">
+        Map will appear here once<br>GOOGLE_MAPS_KEY is set in .env
+      </div>
+      <div id="map" style="display:none;"></div>
+    </div>
+  </div>
+
   <!-- Results -->
   <div class="results" id="results">
     <div class="results-header">
@@ -315,20 +333,12 @@
       <button class="source-tab active" data-filter="all"    onclick="filterCards(this)">All</button>
       <button class="source-tab"        data-filter="places" onclick="filterCards(this)">Google Places</button>
       <button class="source-tab"        data-filter="ai"     onclick="filterCards(this)">AI Only</button>
+      <button class="source-tab"        data-filter="review"   onclick="filterCards(this)">Via Reviews</button>
+      <button class="source-tab"        data-filter="curated" onclick="filterCards(this)">⭐ Curated</button>
     </div>
 
-    <!-- Map + list side by side -->
     <div class="results-body">
       <div class="card-list" id="cardContainer"></div>
-
-      <div class="map-panel">
-        <div class="map-container" id="mapContainer">
-          <div class="map-no-key" id="mapNoKey">
-            Map will appear here once<br>GOOGLE_MAPS_KEY is set in .env
-          </div>
-          <div id="map" style="display:none;"></div>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -377,10 +387,10 @@ async function loadMapsApi() {
     document.getElementById('mapNoKey').style.display = 'none';
     document.getElementById('map').style.display = 'block';
 
-    // Initialise map centred on Northeast London
+    // Initialise map centred on London
     googleMap = new google.maps.Map(document.getElementById('map'), {
-      center: { lat: 51.5200, lng: -0.0700 },
-      zoom: 12,
+      center: { lat: 51.5074, lng: -0.1278 },
+      zoom: 11,
       styles: mapStyles(),
       mapTypeControl: false,
       streetViewControl: false,
@@ -388,6 +398,9 @@ async function loadMapsApi() {
     });
 
     infoWindow = new google.maps.InfoWindow();
+
+    // Silently pre-populate the map with London-wide results
+    runDefaultSearch();
 
   } catch(e) {
     // Maps key not configured — map panel stays hidden with the message
@@ -409,6 +422,22 @@ function mapStyles() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Default map population — runs on load, pins London without showing results list
+// ─────────────────────────────────────────────────────────────────────────────
+async function runDefaultSearch() {
+  try {
+    var places = await fetchGooglePlaces('gozleme London');
+    clearMarkers();
+    places.forEach(function(place, i) {
+      addMarker(place, i);
+    });
+    // Don't fit bounds — keep the city-wide view so users can browse
+  } catch(e) {
+    // Silently fail — user can still search manually
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Filter tabs
 // ─────────────────────────────────────────────────────────────────────────────
 function filterCards(btn) {
@@ -419,8 +448,10 @@ function filterCards(btn) {
     var src = card.dataset.source;
     card.style.display =
       (filter === 'all') ||
-      (filter === 'places' && src === 'places') ||
-      (filter === 'ai'     && src === 'ai')
+      (filter === 'places'  && src === 'places') ||
+      (filter === 'ai'      && src === 'ai') ||
+      (filter === 'review'  && src === 'review') ||
+      (filter === 'curated' && src === 'curated')
         ? '' : 'none';
   });
   // Update map marker visibility to match
@@ -428,8 +459,10 @@ function filterCards(btn) {
     var src = m.placeSource;
     m.setVisible(
       filter === 'all' ||
-      (filter === 'places' && src === 'places') ||
-      (filter === 'ai'     && src === 'ai')
+      (filter === 'places'  && src === 'places') ||
+      (filter === 'ai'      && src === 'ai') ||
+      (filter === 'review'  && src === 'review') ||
+      (filter === 'curated' && src === 'curated')
     );
   });
 }
@@ -465,6 +498,64 @@ async function fetchGooglePlaces(query) {
   });
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Google Places — broad restaurant search filtered by review mentions of gözleme
+// ─────────────────────────────────────────────────────────────────────────────
+async function fetchPlacesByReview(latitude, longitude) {
+  var resp = await fetch('/api/places-by-review', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ latitude: latitude, longitude: longitude, radius: 15000 })
+  });
+  var data = await resp.json();
+  if (!resp.ok) throw new Error(data.error || 'Places-by-review proxy error');
+
+  return (data.places || []).map(function(p) {
+    return {
+      name:          (p.displayName && p.displayName.text) ? p.displayName.text : 'Unknown',
+      address:       p.formattedAddress || p.shortFormattedAddress || '',
+      area:          extractArea(p.formattedAddress || ''),
+      rating:        p.rating || null,
+      reviewCount:   p.userRatingCount || null,
+      isOpen:        (p.currentOpeningHours && p.currentOpeningHours.openNow != null) ? p.currentOpeningHours.openNow : null,
+      priceLevel:    p.priceLevel || null,
+      mapsUrl:       p.googleMapsUri || null,
+      lat:           (p.location && p.location.latitude)  ? p.location.latitude  : null,
+      lng:           (p.location && p.location.longitude) ? p.location.longitude : null,
+      source:        'review',
+      description:   p.matchedReview ? 'Mentioned in reviews: "' + p.matchedReview.substring(0, 120).replace(/"/g, "'") + (p.matchedReview.length > 120 ? '...' : '') + '"' : '',
+      tags:          ['mentioned in reviews']
+    };
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Curated spots — manually maintained list from curated.json
+// ─────────────────────────────────────────────────────────────────────────────
+async function fetchCuratedSpots() {
+  var resp = await fetch('/api/curated');
+  var data = await resp.json();
+  if (!resp.ok) throw new Error(data.error || 'Curated spots error');
+
+  return (data.spots || []).map(function(s) {
+    return {
+      name:        s.name        || 'Unknown',
+      address:     s.address     || '',
+      area:        s.area        || extractArea(s.address || ''),
+      rating:      s.rating      || null,
+      reviewCount: s.reviewCount || null,
+      isOpen:      s.isOpen      != null ? s.isOpen : null,
+      priceLevel:  s.priceLevel  || null,
+      mapsUrl:     s.mapsUrl     || null,
+      lat:         s.lat         || null,
+      lng:         s.lng         || null,
+      source:      'curated',
+      description: s.description || '',
+      tags:        s.tags        || []
+    };
+  });
+}
+
 function extractArea(address) {
   var parts = address.split(',').map(function(s) { return s.trim(); });
   if (parts.length >= 3) return parts[parts.length - 3] || parts[1] || '';
@@ -490,9 +581,56 @@ async function geocodeAddress(address) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Claude AI fetch
+// AI spots — served from cache.json (built by cache-builder.js).
+// Falls back to a live Claude call only if cache is empty or missing.
 // ─────────────────────────────────────────────────────────────────────────────
-async function fetchClaudeResults(location, knownNames) {
+var _cachedSpots = null; // in-memory so we only fetch cache.json once per session
+
+async function fetchAiSpots(location, knownNames) {
+  // Load cache once per session
+  if (_cachedSpots === null) {
+    try {
+      var cacheResp = await fetch('/api/cached-spots');
+      var cacheData = await cacheResp.json();
+      _cachedSpots = cacheData.spots || [];
+      if (_cachedSpots.length > 0 && cacheData.builtAt) {
+        console.log('Cache loaded: ' + _cachedSpots.length + ' spots (built ' + new Date(cacheData.builtAt).toLocaleDateString() + ')');
+      }
+    } catch(e) {
+      _cachedSpots = [];
+    }
+  }
+
+  // If cache has spots, filter to those relevant to the search location
+  if (_cachedSpots.length > 0) {
+    var locLower = location.toLowerCase();
+    var known    = new Set(knownNames.map(function(n) { return n.toLowerCase(); }));
+
+    // Return spots whose area or address loosely matches the search location,
+    // or all spots if the search is very broad (e.g. "London")
+    var isBroadSearch = ['london', 'all', 'everywhere'].some(function(t) { return locLower.includes(t); });
+
+    return _cachedSpots
+      .filter(function(s) {
+        if (known.has((s.name || '').toLowerCase())) return false; // already in Google results
+        if (isBroadSearch) return true;
+        var haystack = ((s.area || '') + ' ' + (s.address || '')).toLowerCase();
+        // Match if any word of the search location appears in the spot's area/address
+        return locLower.split(/\s+/).some(function(word) {
+          return word.length > 2 && haystack.includes(word);
+        });
+      })
+      .map(function(s) {
+        return Object.assign({}, s, { source: 'ai' });
+      });
+  }
+
+  // Cache is empty — fall back to live Claude call
+  console.log('Cache empty, calling Claude AI live...');
+  return fetchClaudeLive(location, knownNames);
+}
+
+async function fetchClaudeLive(location, knownNames) {
   var exclusion = knownNames.length > 0
     ? '\n\nDo NOT include these (already found via Google): ' + knownNames.join(', ')
     : '';
@@ -539,15 +677,25 @@ async function fetchClaudeResults(location, knownNames) {
 // ─────────────────────────────────────────────────────────────────────────────
 function normaliseName(n) { return n.toLowerCase().replace(/[^a-z0-9]/g, ''); }
 
-function dedupe(placesResults, aiResults) {
+function isDupe(norm, seen) {
+  var dupe = false;
+  seen.forEach(function(s) { if (s === norm || s.includes(norm) || norm.includes(s)) dupe = true; });
+  return dupe;
+}
+
+// Merges three sources: direct Places results take priority, then review-filtered,
+// then AI — deduplicating by normalised name throughout
+function dedupeAll(placesResults, reviewResults, curatedResults, aiResults) {
   var merged = placesResults.slice();
   var seen = new Set(placesResults.map(function(p) { return normaliseName(p.name); }));
-  aiResults.forEach(function(p) {
-    var norm = normaliseName(p.name);
-    var dupe = false;
-    seen.forEach(function(s) { if (s === norm || s.includes(norm) || norm.includes(s)) dupe = true; });
-    if (!dupe) { merged.push(p); seen.add(norm); }
+
+  [reviewResults, curatedResults, aiResults].forEach(function(source) {
+    source.forEach(function(p) {
+      var norm = normaliseName(p.name);
+      if (!isDupe(norm, seen)) { merged.push(p); seen.add(norm); }
+    });
   });
+
   return merged;
 }
 
@@ -562,8 +710,7 @@ function clearMarkers() {
 function addMarker(place, index) {
   if (!mapsApiLoaded || !googleMap || place.lat == null || place.lng == null) return;
 
-  var isPlaces = place.source === 'places';
-  var colour   = isPlaces ? '#1a73e8' : '#c9512a';
+  var colour = place.source === 'places' ? '#1a73e8' : place.source === 'review' ? '#2a6b5c' : place.source === 'curated' ? '#d4a017' : '#c9512a';
   var num      = (index + 1).toString();
 
   // Custom SVG pin with number
@@ -643,6 +790,16 @@ function fitMapToBounds(places) {
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
 // ─────────────────────────────────────────────────────────────────────────────
+function haversineKm(lat1, lng1, lat2, lng2) {
+  var R = 6371;
+  var dLat = (lat2 - lat1) * Math.PI / 180;
+  var dLng = (lng2 - lng1) * Math.PI / 180;
+  var a = Math.sin(dLat/2) * Math.sin(dLat/2)
+        + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180)
+        * Math.sin(dLng/2) * Math.sin(dLng/2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
 function priceLevelLabel(level) {
   return { PRICE_LEVEL_FREE: 'Free', PRICE_LEVEL_INEXPENSIVE: '\u00a3', PRICE_LEVEL_MODERATE: '\u00a3\u00a3', PRICE_LEVEL_EXPENSIVE: '\u00a3\u00a3\u00a3', PRICE_LEVEL_VERY_EXPENSIVE: '\u00a3\u00a3\u00a3\u00a3' }[level] || null;
 }
@@ -681,7 +838,8 @@ function showError(msg) {
 // Main search
 // ─────────────────────────────────────────────────────────────────────────────
 async function searchGozleme() {
-  var location = document.getElementById('locationInput').value.trim() || 'Northeast London';
+  var location = document.getElementById('locationInput').value.trim();
+  if (!location) { showError('Please enter a postcode or location to search.'); return; }
 
   var btn           = document.getElementById('searchBtn');
   var loading       = document.getElementById('loading');
@@ -698,24 +856,41 @@ async function searchGozleme() {
   clearMarkers();
   setStep(1);
 
-  var placesResults = [], aiResults = [], errors = [];
+  var placesResults = [], reviewResults = [], curatedResults = [], aiResults = [], errors = [];
 
-  // Step 1: Google Places
+  // Step 1a: Geocode the search location first so review search uses precise coords
+  var searchCoordsEarly = { lat: 51.5074, lng: -0.1278 }; // fallback: central London
+  try {
+    var earlyCoords = await geocodeAddress(location + ', London');
+    if (earlyCoords) searchCoordsEarly = earlyCoords;
+  } catch(e) {}
+
+  // Step 1b: Direct gözleme search + searchNearby review-filtered + curated list, in parallel
   try {
     setStep(1);
-    placesResults = await fetchGooglePlaces('gozleme ' + location + ' London');
+    var directSearch  = fetchGooglePlaces('gozleme ' + location + ' London');
+    var reviewSearch  = fetchPlacesByReview(searchCoordsEarly.lat, searchCoordsEarly.lng);
+    var curatedSearch = fetchCuratedSpots();
+    var step1Results  = await Promise.allSettled([directSearch, reviewSearch, curatedSearch]);
+    placesResults  = step1Results[0].status === 'fulfilled' ? step1Results[0].value : [];
+    reviewResults  = step1Results[1].status === 'fulfilled' ? step1Results[1].value : [];
+    curatedResults = step1Results[2].status === 'fulfilled' ? step1Results[2].value : [];
+    if (step1Results[0].status === 'rejected') errors.push(step1Results[0].reason.message);
+    if (step1Results[1].status === 'rejected') errors.push('Review search: ' + step1Results[1].reason.message);
+    if (step1Results[2].status === 'rejected') errors.push('Curated: ' + step1Results[2].reason.message);
   } catch(e) { errors.push(e.message); }
 
   // Step 2: Claude AI
   try {
     setStep(2);
-    aiResults = await fetchClaudeResults(location, placesResults.map(function(p) { return p.name; }));
+    aiResults = await fetchAiSpots(location, placesResults.map(function(p) { return p.name; }));
   } catch(e) { errors.push(e.message); }
 
   // Step 3: Geocode AI results + build map
   setStep(3);
 
-  var allPlaces = dedupe(placesResults, aiResults);
+  // Merge all three sources: direct Places, review-filtered Places, AI
+  var allPlaces = dedupeAll(placesResults, reviewResults, curatedResults, aiResults);
 
   // Geocode AI results that have an address but no coordinates
   if (mapsApiLoaded) {
@@ -746,21 +921,37 @@ async function searchGozleme() {
     error.textContent = 'Partial results: ' + errors.join(' | ');
   }
 
-  // Sort: Places first, then by rating
+  // Reuse the geocoded coords from step 1a for distance sorting
+  var searchCentre = searchCoordsEarly;
+
+  // Attach distance to each place (if we have coords for both)
+  allPlaces.forEach(function(place) {
+    if (searchCentre && place.lat != null && place.lng != null) {
+      place.distance = haversineKm(searchCentre.lat, searchCentre.lng, place.lat, place.lng);
+    } else {
+      place.distance = null;
+    }
+  });
+
+  // Sort by distance ascending; places without coords go to the end
   allPlaces.sort(function(a, b) {
-    if (a.source === 'places' && b.source !== 'places') return -1;
-    if (b.source === 'places' && a.source !== 'places') return 1;
-    if (a.rating && b.rating) return b.rating - a.rating;
-    return 0;
+    if (a.distance == null && b.distance == null) return 0;
+    if (a.distance == null) return 1;
+    if (b.distance == null) return -1;
+    return a.distance - b.distance;
   });
 
   results.classList.add('active');
 
-  var placesCount = allPlaces.filter(function(p) { return p.source === 'places'; }).length;
-  var aiCount     = allPlaces.filter(function(p) { return p.source === 'ai'; }).length;
+  var placesCount   = allPlaces.filter(function(p) { return p.source === 'places'; }).length;
+  var reviewCount   = allPlaces.filter(function(p) { return p.source === 'review'; }).length;
+  var curatedCount  = allPlaces.filter(function(p) { return p.source === 'curated'; }).length;
+  var aiCount       = allPlaces.filter(function(p) { return p.source === 'ai'; }).length;
   var parts = [];
-  if (placesCount) parts.push(placesCount + ' from Google');
-  if (aiCount)     parts.push(aiCount + ' from AI');
+  if (placesCount)  parts.push(placesCount + ' direct');
+  if (reviewCount)  parts.push(reviewCount + ' via reviews');
+  if (curatedCount) parts.push(curatedCount + ' curated');
+  if (aiCount)      parts.push(aiCount + ' from AI');
   resultsCount.textContent = allPlaces.length + ' spot' + (allPlaces.length !== 1 ? 's' : '') + ' \u00b7 ' + parts.join(', ');
 
   // Render cards + markers
@@ -786,7 +977,8 @@ async function searchGozleme() {
     var priceLabel = priceLevelLabel(place.priceLevel);
     if (priceLabel) metaHtml += '<span class="price-level">' + priceLabel + '</span>';
 
-    var sourceBadge = '<span class="source-badge ' + place.source + '">' + (place.source === 'places' ? 'Google Places' : 'Claude AI') + '</span>';
+    var sourceLabel = place.source === 'places' ? 'Google Places' : place.source === 'review' ? 'Via Reviews' : place.source === 'curated' ? '⭐ Curated' : 'Claude AI';
+    var sourceBadge = '<span class="source-badge ' + place.source + '">' + sourceLabel + '</span>';
     var tags = (place.tags || []).map(function(t, idx) {
       return '<span class="tag ' + (idx % 2 === 0 ? 'red' : 'green') + '">' + escHtml(t) + '</span>';
     }).join('');
@@ -801,7 +993,7 @@ async function searchGozleme() {
         '<div class="card-tags">' + sourceBadge + tags + '</div>' +
       '</div>' +
       '<div class="card-right">' +
-        '<span class="card-area">' + escHtml(place.area || '') + '</span>' +
+        (place.distance != null ? '<span class="card-dist">' + (place.distance < 1 ? Math.round(place.distance * 1000) + 'm' : place.distance.toFixed(1) + 'km') + '</span>' : '<span class="card-area">' + escHtml(place.area || '') + '</span>') +
         '<a href="' + mapsUrl + '" target="_blank" rel="noopener" class="maps-link" onclick="event.stopPropagation()">Map &#8594;</a>' +
       '</div>';
 
@@ -830,6 +1022,19 @@ async function searchGozleme() {
 // ─────────────────────────────────────────────────────────────────────────────
 // Init
 // ─────────────────────────────────────────────────────────────────────────────
+function toggleClearBtn() {
+  var val = document.getElementById('locationInput').value;
+  var btn = document.getElementById('clearBtn');
+  if (val.length > 0) btn.classList.add('visible');
+  else btn.classList.remove('visible');
+}
+
+function clearSearch() {
+  document.getElementById('locationInput').value = '';
+  document.getElementById('clearBtn').classList.remove('visible');
+  document.getElementById('locationInput').focus();
+}
+
 document.getElementById('locationInput').addEventListener('keydown', function(e) {
   if (e.key === 'Enter') searchGozleme();
 });
