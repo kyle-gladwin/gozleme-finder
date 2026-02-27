@@ -29,8 +29,7 @@
 
   body::before {
     content: '';
-    position: fixed;
-    inset: 0;
+    position: fixed; inset: 0;
     background-image:
       radial-gradient(circle at 15% 20%, rgba(201,81,42,0.08) 0%, transparent 40%),
       radial-gradient(circle at 85% 70%, rgba(42,107,92,0.08) 0%, transparent 40%);
@@ -39,400 +38,234 @@
   }
 
   .container {
-    max-width: 920px;
+    max-width: 980px;
     margin: 0 auto;
     padding: 0 24px;
     position: relative;
     z-index: 1;
   }
 
-  /* Header */
-  header { padding: 52px 0 32px; text-align: center; }
+  /* ── Header ── */
+  header { padding: 48px 0 28px; text-align: center; }
 
   .eyebrow {
     font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--terracotta);
-    margin-bottom: 16px;
+    font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--terracotta); margin-bottom: 14px;
   }
 
   h1 {
     font-family: 'Playfair Display', serif;
-    font-size: clamp(44px, 8vw, 76px);
-    line-height: 0.95;
-    color: var(--ink);
+    font-size: clamp(40px, 7vw, 72px);
+    line-height: 0.95; color: var(--ink);
   }
-
   h1 em { font-style: italic; color: var(--terracotta); }
 
   .subtitle {
-    font-size: 15px;
-    color: #6b5a4a;
-    font-weight: 300;
-    margin-top: 18px;
-    max-width: 440px;
-    margin-left: auto;
-    margin-right: auto;
-    line-height: 1.6;
+    font-size: 15px; color: #6b5a4a; font-weight: 300;
+    margin-top: 16px; max-width: 440px;
+    margin-left: auto; margin-right: auto; line-height: 1.6;
   }
 
-  /* Divider */
-  .divider { display: flex; align-items: center; gap: 12px; margin: 28px 0; }
+  /* ── Divider ── */
+  .divider { display: flex; align-items: center; gap: 12px; margin: 24px 0; }
   .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: linear-gradient(to right, transparent, var(--gold)); }
   .divider::after { background: linear-gradient(to left, transparent, var(--gold)); }
-  .divider span { font-size: 18px; }
+  .divider span { font-size: 16px; }
 
-  /* API Key Panel */
-  .api-panel {
-    background: var(--cream);
-    border: 1px solid var(--smoke);
-    border-radius: 2px;
-    margin-bottom: 16px;
-    overflow: hidden;
-  }
-
-  .api-panel-toggle {
-    width: 100%;
-    padding: 14px 20px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: #8a7060;
-  }
-
-  .api-panel-toggle:hover { color: var(--terracotta); }
-  .api-panel-toggle .chevron { transition: transform 0.2s; font-size: 10px; }
-  .api-panel-toggle.open .chevron { transform: rotate(180deg); }
-
-  .api-panel-body { display: none; padding: 0 20px 20px; border-top: 1px solid var(--smoke); }
-  .api-panel-body.open { display: block; }
-
-  .api-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-top: 16px;
-  }
-
-  @media (max-width: 600px) { .api-grid { grid-template-columns: 1fr; } }
-
-  .api-field label {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: #8a7060;
-    display: block;
-    margin-bottom: 6px;
-  }
-
-  .api-field input {
-    width: 100%;
-    padding: 10px 14px;
-    border: 1.5px solid var(--smoke);
-    border-radius: 2px;
-    background: var(--bg);
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    color: var(--ink);
-    outline: none;
-    transition: border-color 0.2s;
-  }
-
-  .api-field input:focus { border-color: var(--terracotta); }
-
-  .api-hint { font-size: 12px; color: #a08878; margin-top: 6px; line-height: 1.5; }
-  .api-hint a { color: var(--terracotta); }
-
-  .api-status { display: flex; gap: 12px; margin-top: 14px; flex-wrap: wrap; }
-
-  .status-pill {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    padding: 4px 10px;
-    border-radius: 20px;
-    border: 1px solid var(--smoke);
-    color: #8a7060;
-  }
-
-  .status-pill .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--smoke); }
-  .status-pill.active { color: var(--accent); border-color: rgba(42,107,92,0.3); }
-  .status-pill.active .dot { background: var(--accent); }
-
-  /* Search Section */
+  /* ── Search ── */
   .search-section {
-    background: var(--cream);
-    border: 1px solid var(--smoke);
-    border-radius: 2px;
-    padding: 28px;
-    margin-bottom: 32px;
+    background: var(--cream); border: 1px solid var(--smoke); border-radius: 2px;
+    padding: 24px 28px; margin-bottom: 28px;
     box-shadow: 6px 6px 0 rgba(201,81,42,0.1);
   }
-
   .search-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: #8a7060;
-    display: block;
-    margin-bottom: 10px;
+    font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.15em;
+    text-transform: uppercase; color: #8a7060; display: block; margin-bottom: 10px;
   }
-
   .search-row { display: flex; gap: 12px; flex-wrap: wrap; }
-
   .search-input {
-    flex: 1;
-    min-width: 200px;
-    padding: 13px 18px;
-    border: 1.5px solid var(--smoke);
-    border-radius: 2px;
-    background: var(--bg);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 16px;
-    color: var(--ink);
-    outline: none;
-    transition: border-color 0.2s;
+    flex: 1; min-width: 200px; padding: 12px 18px; border: 1.5px solid var(--smoke);
+    border-radius: 2px; background: var(--bg); font-family: 'DM Sans', sans-serif;
+    font-size: 16px; color: var(--ink); outline: none; transition: border-color 0.2s;
   }
-
   .search-input:focus { border-color: var(--terracotta); }
-
   .search-btn {
-    padding: 13px 28px;
-    background: var(--terracotta);
-    color: white;
-    border: none;
-    border-radius: 2px;
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: all 0.2s;
-    white-space: nowrap;
+    padding: 12px 28px; background: var(--terracotta); color: white; border: none;
+    border-radius: 2px; font-family: 'DM Mono', monospace; font-size: 12px;
+    letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer;
+    transition: all 0.2s; white-space: nowrap;
   }
-
   .search-btn:hover { background: #b04422; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(201,81,42,0.3); }
   .search-btn:disabled { background: #c4a898; transform: none; box-shadow: none; cursor: not-allowed; }
 
-  /* Loading */
-  .loading { text-align: center; padding: 50px 0; display: none; }
+  /* ── Loading ── */
+  .loading { text-align: center; padding: 48px 0; display: none; }
   .loading.active { display: block; }
-
   .spinner {
-    width: 36px; height: 36px;
-    border: 3px solid var(--smoke);
-    border-top-color: var(--terracotta);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin: 0 auto 14px;
+    width: 36px; height: 36px; border: 3px solid var(--smoke);
+    border-top-color: var(--terracotta); border-radius: 50%;
+    animation: spin 0.8s linear infinite; margin: 0 auto 14px;
   }
-
   @keyframes spin { to { transform: rotate(360deg); } }
-
   .loading-text { font-family: 'DM Mono', monospace; font-size: 12px; color: #8a7060; letter-spacing: 0.1em; }
-
-  .loading-steps { margin-top: 12px; display: flex; flex-direction: column; gap: 4px; align-items: center; }
-
-  .loading-step {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    color: #c4a898;
-    letter-spacing: 0.08em;
-    transition: color 0.3s;
-  }
-
+  .loading-steps { margin-top: 10px; display: flex; flex-direction: column; gap: 4px; align-items: center; }
+  .loading-step { font-family: 'DM Mono', monospace; font-size: 10px; color: #c4a898; letter-spacing: 0.08em; transition: color 0.3s; }
   .loading-step.active { color: var(--terracotta); }
-  .loading-step.done { color: var(--accent); }
+  .loading-step.done   { color: var(--accent); }
 
-  /* Source Tabs */
-  .source-tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+  /* ── Error ── */
+  .error { display: none; background: #fff3f0; border: 1px solid #f0c0b0; border-radius: 2px; padding: 16px 20px; color: #a03020; font-size: 13px; line-height: 1.6; margin-bottom: 14px; }
+  .error.active { display: block; }
 
-  .source-tab {
-    padding: 6px 14px;
-    border: 1.5px solid var(--smoke);
-    border-radius: 2px;
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    cursor: pointer;
-    background: none;
-    color: #8a7060;
-    transition: all 0.15s;
-  }
-
-  .source-tab:hover { border-color: var(--terracotta); color: var(--terracotta); }
-  .source-tab.active { background: var(--ink); border-color: var(--ink); color: white; }
-
-  /* Results */
+  /* ── Results layout ── */
   .results { display: none; }
   .results.active { display: block; }
 
   .results-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-    gap: 8px;
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 16px; flex-wrap: wrap; gap: 8px;
   }
-
-  .results-title { font-family: 'Playfair Display', serif; font-size: 26px; }
+  .results-title { font-family: 'Playfair Display', serif; font-size: 24px; }
   .results-count { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--terracotta); letter-spacing: 0.1em; }
 
-  /* Card */
-  .card {
-    background: var(--cream);
-    border: 1px solid var(--smoke);
-    border-radius: 2px;
-    padding: 24px 28px;
-    margin-bottom: 14px;
+  /* Source filter tabs */
+  .source-tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .source-tab {
+    padding: 5px 13px; border: 1.5px solid var(--smoke); border-radius: 2px;
+    font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em;
+    text-transform: uppercase; cursor: pointer; background: none; color: #8a7060; transition: all 0.15s;
+  }
+  .source-tab:hover { border-color: var(--terracotta); color: var(--terracotta); }
+  .source-tab.active { background: var(--ink); border-color: var(--ink); color: white; }
+
+  /* ── Two-column layout: map + list ── */
+  .results-body {
     display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 16px;
-    transition: all 0.2s;
-    position: relative;
+    grid-template-columns: 1fr 400px;
+    gap: 20px;
+    align-items: start;
+  }
+
+  @media (max-width: 800px) {
+    .results-body { grid-template-columns: 1fr; }
+    .map-panel { order: -1; }  /* map on top on mobile */
+  }
+
+  /* ── Map panel ── */
+  .map-panel {
+    position: sticky;
+    top: 20px;
+  }
+
+  .map-container {
+    width: 100%;
+    height: 520px;
+    border-radius: 2px;
+    border: 1px solid var(--smoke);
     overflow: hidden;
+    background: var(--smoke);
+  }
+
+  #map { width: 100%; height: 100%; }
+
+  .map-no-key {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: #8a7060;
+    letter-spacing: 0.08em;
+    text-align: center;
+    padding: 24px;
+    line-height: 1.8;
+  }
+
+  /* ── Cards list ── */
+  .card-list { display: flex; flex-direction: column; gap: 12px; }
+
+  /* ── Card ── */
+  .card {
+    background: var(--cream); border: 1px solid var(--smoke); border-radius: 2px;
+    padding: 18px 22px; cursor: pointer;
+    display: grid; grid-template-columns: 28px 1fr auto;
+    gap: 12px; align-items: start;
+    transition: all 0.18s; position: relative; overflow: hidden;
     animation: fadeInUp 0.3s ease both;
   }
 
   .card::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 0; bottom: 0;
-    width: 4px;
-    transform: scaleY(0);
-    transition: transform 0.2s;
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+    transform: scaleY(0); transition: transform 0.18s;
   }
-
   .card.source-places::before { background: var(--places-blue); }
-  .card.source-ai::before { background: var(--terracotta); }
+  .card.source-ai::before     { background: var(--terracotta); }
 
-  .card:hover { box-shadow: 4px 4px 0 rgba(201,81,42,0.12); transform: translateX(-2px); }
-  .card:hover::before { transform: scaleY(1); }
-
-  .card-name { font-family: 'Playfair Display', serif; font-size: 20px; margin-bottom: 4px; color: var(--ink); }
-  .card-address { font-size: 13px; color: #8a7060; margin-bottom: 8px; font-weight: 300; }
-  .card-desc { font-size: 13px; line-height: 1.65; color: #4a3828; }
-
-  .card-meta { display: flex; align-items: center; gap: 12px; margin-top: 10px; flex-wrap: wrap; }
-
-  .rating { display: flex; align-items: center; gap: 4px; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--ink); }
-  .stars { color: var(--gold); font-size: 11px; }
-  .review-count { color: #8a7060; font-size: 11px; }
-
-  .open-badge {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    padding: 3px 8px;
-    border-radius: 2px;
+  .card:hover, .card.highlighted {
+    box-shadow: 4px 4px 0 rgba(201,81,42,0.14);
+    transform: translateX(-2px);
+    border-color: rgba(201,81,42,0.3);
   }
+  .card:hover::before, .card.highlighted::before { transform: scaleY(1); }
 
-  .open-badge.open { background: rgba(42,107,92,0.12); color: var(--accent); }
-  .open-badge.closed { background: rgba(201,81,42,0.1); color: var(--terracotta); }
-
-  .price-level { font-family: 'DM Mono', monospace; font-size: 12px; color: #8a7060; }
-
-  .card-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
-
-  .tag {
-    padding: 3px 9px;
-    border-radius: 2px;
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+  /* Number badge */
+  .card-num {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--terracotta); color: white;
+    font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 2px;
   }
+  .card.source-places .card-num { background: var(--places-blue); }
 
-  .tag.red { background: rgba(201,81,42,0.1); color: var(--terracotta); }
+  .card-name { font-family: 'Playfair Display', serif; font-size: 17px; margin-bottom: 3px; color: var(--ink); }
+  .card-address { font-size: 12px; color: #8a7060; margin-bottom: 6px; font-weight: 300; }
+  .card-desc { font-size: 12px; line-height: 1.6; color: #4a3828; }
+
+  .card-meta { display: flex; align-items: center; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
+  .rating { display: flex; align-items: center; gap: 4px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--ink); }
+  .stars { color: var(--gold); font-size: 10px; }
+  .review-count { color: #8a7060; font-size: 10px; }
+  .open-badge { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 7px; border-radius: 2px; }
+  .open-badge.open   { background: rgba(42,107,92,0.12); color: var(--accent); }
+  .open-badge.closed { background: rgba(201,81,42,0.1);  color: var(--terracotta); }
+  .price-level { font-family: 'DM Mono', monospace; font-size: 11px; color: #8a7060; }
+
+  .card-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 8px; }
+  .tag { padding: 2px 8px; border-radius: 2px; font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; }
+  .tag.red   { background: rgba(201,81,42,0.1); color: var(--terracotta); }
   .tag.green { background: rgba(42,107,92,0.1); color: var(--accent); }
 
-  .source-badge {
-    font-family: 'DM Mono', monospace;
-    font-size: 9px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    padding: 2px 7px;
-    border-radius: 2px;
-    border: 1px solid;
-  }
-
+  .source-badge { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; padding: 2px 6px; border-radius: 2px; border: 1px solid; }
   .source-badge.places { color: var(--places-blue); border-color: rgba(26,115,232,0.3); background: rgba(26,115,232,0.06); }
-  .source-badge.ai { color: var(--terracotta); border-color: rgba(201,81,42,0.3); background: rgba(201,81,42,0.06); }
+  .source-badge.ai     { color: var(--terracotta);  border-color: rgba(201,81,42,0.3);  background: rgba(201,81,42,0.06); }
 
-  .card-right {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 8px;
-    min-width: 80px;
-  }
-
-  .card-area {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: #8a7060;
-    text-align: right;
-  }
-
+  .card-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; min-width: 60px; }
+  .card-area { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: #8a7060; text-align: right; }
   .maps-link {
-    padding: 7px 13px;
-    border: 1.5px solid var(--terracotta);
-    color: var(--terracotta);
-    text-decoration: none;
-    border-radius: 2px;
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    transition: all 0.2s;
-    white-space: nowrap;
+    padding: 5px 10px; border: 1.5px solid var(--terracotta); color: var(--terracotta);
+    text-decoration: none; border-radius: 2px; font-family: 'DM Mono', monospace;
+    font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase;
+    transition: all 0.2s; white-space: nowrap;
   }
-
   .maps-link:hover { background: var(--terracotta); color: white; }
 
-  /* Error */
-  .error { display: none; background: #fff3f0; border: 1px solid #f0c0b0; border-radius: 2px; padding: 18px 22px; color: #a03020; font-size: 13px; line-height: 1.6; margin-bottom: 16px; }
-  .error.active { display: block; }
-
-  /* Note */
+  /* ── Note ── */
   .note {
-    text-align: center;
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    color: #b09a88;
-    letter-spacing: 0.08em;
-    padding: 28px 0 56px;
-    line-height: 1.8;
+    text-align: center; font-family: 'DM Mono', monospace; font-size: 10px;
+    color: #b09a88; letter-spacing: 0.08em; padding: 24px 0 52px; line-height: 1.8;
   }
 
   @keyframes fadeInUp {
     from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
+    to   { opacity: 1; transform: translateY(0); }
   }
 
   @media (max-width: 600px) {
-    .card { grid-template-columns: 1fr; }
-    .card-right { align-items: flex-start; flex-direction: row; flex-wrap: wrap; }
+    .card { grid-template-columns: 24px 1fr; }
+    .card-right { display: none; }
   }
 </style>
 </head>
@@ -442,40 +275,17 @@
   <header>
     <p class="eyebrow">🫓 Turkish Street Food Finder</p>
     <h1>Find <em>Gözleme</em><br>Near You</h1>
-    <p class="subtitle">Live results from Google Places combined with AI knowledge — the most complete Gözleme guide in London.</p>
+    <p class="subtitle">Live results from Google Places combined with AI knowledge, mapped across London.</p>
   </header>
 
-  <div class="divider"><span>✦</span></div>
 
-  <!-- API Key Panel -->
-  <div class="api-panel" id="apiPanel">
-    <button class="api-panel-toggle" id="apiToggle" onclick="toggleApiPanel()">
-      <span>&#9881; API Keys &amp; Data Sources</span>
-      <span class="chevron">&#9660;</span>
-    </button>
-    <div class="api-panel-body" id="apiBody">
-      <div class="api-grid" style="grid-template-columns: 1fr;">
-        <div class="api-field">
-          <label>Anthropic API Key</label>
-          <input type="password" id="anthropicKey" placeholder="sk-ant-..." oninput="saveKeys()" autocomplete="off">
-          <p class="api-hint">Powers AI descriptions &amp; gap-filling.<br>Get one at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a></p>
-        </div>
-      </div>
-      <p class="api-hint" style="margin-top:14px; padding: 10px 12px; background: rgba(42,107,92,0.07); border-left: 3px solid var(--accent);">
-        Google Places key is configured in <strong>.env</strong> on the server &mdash; no browser exposure needed.
-      </p>
-      <div class="api-status" id="apiStatus">
-        <span class="status-pill" id="pillAnthropic"><span class="dot"></span>Claude: not set</span>
-        <span class="status-pill active"><span class="dot"></span>Google Places: via server</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Search -->
+    <!-- Search -->
   <div class="search-section">
     <label class="search-label">Search Location</label>
     <div class="search-row">
-      <input type="text" class="search-input" id="locationInput" placeholder="e.g. Hackney, Stoke Newington, Northeast London..." value="Northeast London">
+      <input type="text" class="search-input" id="locationInput"
+             placeholder="e.g. Hackney, Stoke Newington, Northeast London..."
+             value="Northeast London">
       <button class="search-btn" id="searchBtn" onclick="searchGozleme()">Search</button>
     </div>
   </div>
@@ -483,11 +293,11 @@
   <!-- Loading -->
   <div class="loading" id="loading">
     <div class="spinner"></div>
-    <p class="loading-text">Searching for Gozleme spots...</p>
+    <p class="loading-text">Searching for Gözleme spots...</p>
     <div class="loading-steps">
       <span class="loading-step" id="step1">1. Querying Google Places...</span>
       <span class="loading-step" id="step2">2. Asking Claude AI...</span>
-      <span class="loading-step" id="step3">3. Merging &amp; deduplicating results...</span>
+      <span class="loading-step" id="step3">3. Geocoding &amp; building map...</span>
     </div>
   </div>
 
@@ -500,93 +310,157 @@
       <h2 class="results-title">Spots Found</h2>
       <span class="results-count" id="resultsCount"></span>
     </div>
-    <div class="source-tabs" id="sourceTabs">
-      <button class="source-tab active" data-filter="all" onclick="filterCards(this)">All</button>
-      <button class="source-tab" data-filter="places" onclick="filterCards(this)">Google Places</button>
-      <button class="source-tab" data-filter="ai" onclick="filterCards(this)">AI Only</button>
+
+    <div class="source-tabs">
+      <button class="source-tab active" data-filter="all"    onclick="filterCards(this)">All</button>
+      <button class="source-tab"        data-filter="places" onclick="filterCards(this)">Google Places</button>
+      <button class="source-tab"        data-filter="ai"     onclick="filterCards(this)">AI Only</button>
     </div>
-    <div id="cardContainer"></div>
+
+    <!-- Map + list side by side -->
+    <div class="results-body">
+      <div class="card-list" id="cardContainer"></div>
+
+      <div class="map-panel">
+        <div class="map-container" id="mapContainer">
+          <div class="map-no-key" id="mapNoKey">
+            Map will appear here once<br>GOOGLE_MAPS_KEY is set in .env
+          </div>
+          <div id="map" style="display:none;"></div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <p class="note">
     Google Places results reflect live business data &middot; AI results are from Claude's training knowledge<br>
-    Always call ahead to confirm Gozleme is currently on the menu
+    Always call ahead to confirm Gözleme is on the menu
   </p>
 
 </div>
 
 <script>
-// ── Key storage (sessionStorage only — not persisted to disk) ──
-function saveKeys() {
-  const ak = document.getElementById('anthropicKey').value.trim();
-  if (ak) sessionStorage.setItem('anthropic_key', ak);
-  updateStatusPills();
+// ─────────────────────────────────────────────────────────────────────────────
+// State
+// ─────────────────────────────────────────────────────────────────────────────
+var googleMap      = null;
+var mapMarkers     = [];
+var infoWindow     = null;
+var mapsApiLoaded  = false;
+var mapsKeyAvailable = false;
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Google Maps initialisation
+// ─────────────────────────────────────────────────────────────────────────────
+async function loadMapsApi() {
+  // Ask server for the Maps key
+  try {
+    var r = await fetch('/api/maps-key');
+    if (!r.ok) throw new Error('no key');
+    var data = await r.json();
+    if (!data.key) throw new Error('empty key');
+
+    mapsKeyAvailable = true;
+
+    // Dynamically inject the Maps JS script
+    await new Promise(function(resolve, reject) {
+      var s = document.createElement('script');
+      s.src = 'https://maps.googleapis.com/maps/api/js?key=' + data.key;
+      s.async = true;
+      s.onload  = resolve;
+      s.onerror = reject;
+      document.head.appendChild(s);
+    });
+
+    mapsApiLoaded = true;
+    document.getElementById('mapNoKey').style.display = 'none';
+    document.getElementById('map').style.display = 'block';
+
+    // Initialise map centred on Northeast London
+    googleMap = new google.maps.Map(document.getElementById('map'), {
+      center: { lat: 51.5200, lng: -0.0700 },
+      zoom: 12,
+      styles: mapStyles(),
+      mapTypeControl: false,
+      streetViewControl: false,
+      fullscreenControl: true,
+    });
+
+    infoWindow = new google.maps.InfoWindow();
+
+  } catch(e) {
+    // Maps key not configured — map panel stays hidden with the message
+    mapsKeyAvailable = false;
+  }
 }
 
-function loadKeys() {
-  const ak = sessionStorage.getItem('anthropic_key') || '';
-  if (ak) document.getElementById('anthropicKey').value = ak;
-  updateStatusPills();
+function mapStyles() {
+  return [
+    { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
+    { featureType: 'transit', elementType: 'labels', stylers: [{ visibility: 'off' }] },
+    { elementType: 'geometry', stylers: [{ color: '#f5ede0' }] },
+    { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#e8ddd0' }] },
+    { featureType: 'road.arterial', elementType: 'geometry', stylers: [{ color: '#ddd0c0' }] },
+    { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#c8d8e8' }] },
+    { elementType: 'labels.text.fill', stylers: [{ color: '#4a3828' }] },
+    { elementType: 'labels.text.stroke', stylers: [{ color: '#f5ede0' }] },
+  ];
 }
 
-function updateStatusPills() {
-  const ak = document.getElementById('anthropicKey').value.trim();
-  const pa = document.getElementById('pillAnthropic');
-  if (ak) { pa.className = 'status-pill active'; pa.innerHTML = '<span class="dot"></span>Claude: ready'; }
-  else     { pa.className = 'status-pill';        pa.innerHTML = '<span class="dot"></span>Claude: not set'; }
-}
-
-function toggleApiPanel() {
-  const body = document.getElementById('apiBody');
-  const toggle = document.getElementById('apiToggle');
-  body.classList.toggle('open');
-  toggle.classList.toggle('open');
-}
-
-// ── Filter tabs ──
+// ─────────────────────────────────────────────────────────────────────────────
+// Filter tabs
+// ─────────────────────────────────────────────────────────────────────────────
 function filterCards(btn) {
-  document.querySelectorAll('.source-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.source-tab').forEach(function(t) { t.classList.remove('active'); });
   btn.classList.add('active');
-  const filter = btn.dataset.filter;
-  document.querySelectorAll('.card').forEach(card => {
-    const src = card.dataset.source;
-    if (filter === 'all') { card.style.display = ''; }
-    else if (filter === 'places' && src === 'places') { card.style.display = ''; }
-    else if (filter === 'ai' && src === 'ai') { card.style.display = ''; }
-    else { card.style.display = 'none'; }
+  var filter = btn.dataset.filter;
+  document.querySelectorAll('.card').forEach(function(card) {
+    var src = card.dataset.source;
+    card.style.display =
+      (filter === 'all') ||
+      (filter === 'places' && src === 'places') ||
+      (filter === 'ai'     && src === 'ai')
+        ? '' : 'none';
+  });
+  // Update map marker visibility to match
+  mapMarkers.forEach(function(m) {
+    var src = m.placeSource;
+    m.setVisible(
+      filter === 'all' ||
+      (filter === 'places' && src === 'places') ||
+      (filter === 'ai'     && src === 'ai')
+    );
   });
 }
 
-// ── Google Places — calls local Express proxy (avoids CORS) ──
+// ─────────────────────────────────────────────────────────────────────────────
+// Google Places proxy
+// ─────────────────────────────────────────────────────────────────────────────
 async function fetchGooglePlaces(query) {
-  const resp = await fetch('/api/places', {
+  var resp = await fetch('/api/places', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      textQuery: query,
-      latitude: 51.5200,
-      longitude: -0.0700,
-      radius: 15000,
-      maxResults: 20
-    })
+    body: JSON.stringify({ textQuery: query, latitude: 51.5200, longitude: -0.0700, radius: 15000, maxResults: 20 })
   });
-
-  const data = await resp.json();
+  var data = await resp.json();
   if (!resp.ok) throw new Error(data.error || 'Google Places proxy error');
 
   return (data.places || []).map(function(p) {
     return {
-      name: (p.displayName && p.displayName.text) ? p.displayName.text : 'Unknown',
-      address: p.formattedAddress || p.shortFormattedAddress || '',
-      area: extractArea(p.formattedAddress || ''),
-      rating: p.rating || null,
+      name:        (p.displayName && p.displayName.text) ? p.displayName.text : 'Unknown',
+      address:     p.formattedAddress || p.shortFormattedAddress || '',
+      area:        extractArea(p.formattedAddress || ''),
+      rating:      p.rating || null,
       reviewCount: p.userRatingCount || null,
-      isOpen: (p.currentOpeningHours && p.currentOpeningHours.openNow != null) ? p.currentOpeningHours.openNow : null,
-      priceLevel: p.priceLevel || null,
-      mapsUrl: p.googleMapsUri || null,
-      source: 'places',
+      isOpen:      (p.currentOpeningHours && p.currentOpeningHours.openNow != null) ? p.currentOpeningHours.openNow : null,
+      priceLevel:  p.priceLevel || null,
+      mapsUrl:     p.googleMapsUri || null,
+      lat:         (p.location && p.location.latitude)  ? p.location.latitude  : null,
+      lng:         (p.location && p.location.longitude) ? p.location.longitude : null,
+      source:      'places',
       description: '',
-      tags: []
+      tags:        []
     };
   });
 }
@@ -597,58 +471,51 @@ function extractArea(address) {
   return parts[1] || '';
 }
 
-function priceLevelLabel(level) {
-  var map = {
-    'PRICE_LEVEL_FREE': 'Free',
-    'PRICE_LEVEL_INEXPENSIVE': 'GBP',
-    'PRICE_LEVEL_MODERATE': 'GBP GBP',
-    'PRICE_LEVEL_EXPENSIVE': 'GBP GBP GBP',
-    'PRICE_LEVEL_VERY_EXPENSIVE': 'GBP GBP GBP GBP'
-  };
-  var labels = { 'PRICE_LEVEL_FREE': 'Free', 'PRICE_LEVEL_INEXPENSIVE': '\u00a3', 'PRICE_LEVEL_MODERATE': '\u00a3\u00a3', 'PRICE_LEVEL_EXPENSIVE': '\u00a3\u00a3\u00a3', 'PRICE_LEVEL_VERY_EXPENSIVE': '\u00a3\u00a3\u00a3\u00a3' };
-  return labels[level] || null;
+// ─────────────────────────────────────────────────────────────────────────────
+// Geocode proxy (for AI results without coordinates)
+// ─────────────────────────────────────────────────────────────────────────────
+async function geocodeAddress(address) {
+  try {
+    var resp = await fetch('/api/geocode', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ address: address + ', London, UK' })
+    });
+    if (!resp.ok) return null;
+    var data = await resp.json();
+    return (data.lat && data.lng) ? { lat: data.lat, lng: data.lng } : null;
+  } catch(e) {
+    return null;
+  }
 }
 
-function starString(rating) {
-  if (!rating) return '';
-  var full = Math.floor(rating);
-  var half = (rating - full) >= 0.4 ? 1 : 0;
-  var empty = 5 - full - half;
-  return '\u2605'.repeat(full) + (half ? '\u00bd' : '') + '\u2606'.repeat(empty);
-}
-
-// ── Claude AI Fetch ──
-async function fetchClaudeResults(location, anthropicKey, knownNames) {
+// ─────────────────────────────────────────────────────────────────────────────
+// Claude AI fetch
+// ─────────────────────────────────────────────────────────────────────────────
+async function fetchClaudeResults(location, knownNames) {
   var exclusion = knownNames.length > 0
-    ? '\n\nDo NOT include these places (already found via Google): ' + knownNames.join(', ')
+    ? '\n\nDo NOT include these (already found via Google): ' + knownNames.join(', ')
     : '';
 
-  var prompt = 'You are a helpful local food guide for London. Find real eateries, restaurants, cafes, or market stalls in or near "' + location + '" (London, UK) that are known to serve Gozleme (Turkish stuffed flatbread).' + exclusion + '\n\nIMPORTANT: Use only plain ASCII characters in all string values. Replace apostrophes with a plain single quote or omit them.\n\nReturn ONLY a valid JSON array, no markdown fences, no explanation. Format:\n[{"name":"...","area":"...","address":"...","description":"one or two plain sentences","tags":["tag1","tag2"]}]\n\nInclude up to 12 results. Only include real places you are confident about. If fewer than 4 exist in that exact area, expand to nearby London areas.';
+  var prompt = 'You are a helpful local food guide for London. Find real eateries in or near "' + location + '" (London, UK) that serve Gozleme (Turkish stuffed flatbread).' + exclusion
+    + '\n\nUse only plain ASCII characters in all string values. No apostrophes or special unicode.'
+    + '\n\nReturn ONLY a valid JSON array, no markdown. Format:\n[{"name":"...","area":"...","address":"full street address if known","description":"1-2 sentences","tags":["tag1"]}]\n\nUp to 12 results. Only real, confident places.';
 
-  var resp = await fetch('https://api.anthropic.com/v1/messages', {
+  var resp = await fetch('/api/claude', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': anthropicKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true'
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 2000,
-      messages: [{ role: 'user', content: prompt }]
-    })
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 2000, messages: [{ role: 'user', content: prompt }] })
   });
 
   var data = await resp.json();
-  if (!resp.ok) throw new Error('Claude: ' + ((data.error && data.error.message) ? data.error.message : resp.statusText));
+  if (!resp.ok) throw new Error('Claude: ' + (data.error && data.error.message ? data.error.message : resp.statusText));
 
   var allText = (data.content || []).filter(function(b) { return b.type === 'text'; }).map(function(b) { return b.text; }).join('');
   if (!allText) throw new Error('No text response from Claude');
 
   var jsonText = allText.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
   var arrayMatch = jsonText.match(/\[[\s\S]*\]/);
-  if (!arrayMatch) throw new Error('Could not parse Claude response as JSON array');
+  if (!arrayMatch) throw new Error('Could not parse Claude response');
 
   jsonText = arrayMatch[0]
     .replace(/[\u2018\u2019]/g, "'")
@@ -656,45 +523,143 @@ async function fetchClaudeResults(location, anthropicKey, knownNames) {
     .replace(/[\u2013\u2014]/g, '-');
 
   var places;
-  try {
-    places = JSON.parse(jsonText);
-  } catch(e) {
-    var sanitised = jsonText.replace(/"([^"]*)"/g, function(_, inner) {
-      return '"' + inner.replace(/[^\x20-\x7E]/g, '') + '"';
-    });
-    places = JSON.parse(sanitised);
+  try { places = JSON.parse(jsonText); }
+  catch(e) {
+    var s = jsonText.replace(/"([^"]*)"/g, function(_, i) { return '"' + i.replace(/[^\x20-\x7E]/g, '') + '"'; });
+    places = JSON.parse(s);
   }
 
   return places.map(function(p) {
-    return Object.assign({ rating: null, reviewCount: null, isOpen: null, priceLevel: null, mapsUrl: null, source: 'ai' }, p);
+    return Object.assign({ rating: null, reviewCount: null, isOpen: null, priceLevel: null, mapsUrl: null, lat: null, lng: null, source: 'ai' }, p);
   });
 }
 
-// ── Deduplication ──
-function normaliseName(name) {
-  return name.toLowerCase().replace(/[^a-z0-9]/g, '');
-}
+// ─────────────────────────────────────────────────────────────────────────────
+// Deduplication
+// ─────────────────────────────────────────────────────────────────────────────
+function normaliseName(n) { return n.toLowerCase().replace(/[^a-z0-9]/g, ''); }
 
 function dedupe(placesResults, aiResults) {
   var merged = placesResults.slice();
   var seen = new Set(placesResults.map(function(p) { return normaliseName(p.name); }));
-
-  aiResults.forEach(function(place) {
-    var norm = normaliseName(place.name);
-    var isDupe = false;
-    seen.forEach(function(s) {
-      if (s === norm || s.includes(norm) || norm.includes(s)) isDupe = true;
-    });
-    if (!isDupe) {
-      merged.push(place);
-      seen.add(norm);
-    }
+  aiResults.forEach(function(p) {
+    var norm = normaliseName(p.name);
+    var dupe = false;
+    seen.forEach(function(s) { if (s === norm || s.includes(norm) || norm.includes(s)) dupe = true; });
+    if (!dupe) { merged.push(p); seen.add(norm); }
   });
-
   return merged;
 }
 
-// ── Step indicators ──
+// ─────────────────────────────────────────────────────────────────────────────
+// Map helpers
+// ─────────────────────────────────────────────────────────────────────────────
+function clearMarkers() {
+  mapMarkers.forEach(function(m) { m.setMap(null); });
+  mapMarkers = [];
+}
+
+function addMarker(place, index) {
+  if (!mapsApiLoaded || !googleMap || place.lat == null || place.lng == null) return;
+
+  var isPlaces = place.source === 'places';
+  var colour   = isPlaces ? '#1a73e8' : '#c9512a';
+  var num      = (index + 1).toString();
+
+  // Custom SVG pin with number
+  var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="0 0 32 40">'
+    + '<path d="M16 0C7.16 0 0 7.16 0 16c0 10 16 24 16 24S32 26 32 16C32 7.16 24.84 0 16 0z" fill="' + colour + '"/>'
+    + '<circle cx="16" cy="16" r="10" fill="white" opacity="0.9"/>'
+    + '<text x="16" y="20" text-anchor="middle" font-family="DM Mono, monospace" font-size="10" font-weight="bold" fill="' + colour + '">' + num + '</text>'
+    + '</svg>';
+
+  var marker = new google.maps.Marker({
+    position: { lat: place.lat, lng: place.lng },
+    map: googleMap,
+    title: place.name,
+    icon: {
+      url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
+      scaledSize: new google.maps.Size(32, 40),
+      anchor: new google.maps.Point(16, 40),
+    },
+    zIndex: index,
+  });
+
+  marker.placeSource = place.source;
+  marker.placeIndex  = index;
+
+  // Click marker → highlight card and open info window
+  marker.addListener('click', function() {
+    highlightCard(index);
+    openInfoWindow(marker, place);
+  });
+
+  mapMarkers.push(marker);
+  return marker;
+}
+
+function openInfoWindow(marker, place) {
+  var priceLabel = priceLevelLabel(place.priceLevel);
+  var content =
+    '<div style="font-family: DM Sans, sans-serif; max-width: 220px; padding: 4px;">' +
+      '<strong style="font-family: Playfair Display, serif; font-size: 14px;">' + escHtml(place.name) + '</strong>' +
+      (place.address ? '<p style="font-size: 12px; color: #8a7060; margin: 4px 0;">' + escHtml(place.address) + '</p>' : '') +
+      (place.rating  ? '<p style="font-size: 12px; margin: 4px 0;">' +
+        '<span style="color: #d4a017;">' + starString(place.rating) + '</span> ' + place.rating.toFixed(1) +
+        (place.reviewCount ? ' <span style="color: #8a7060;">(' + place.reviewCount.toLocaleString() + ')</span>' : '') +
+        (priceLabel ? ' &middot; ' + priceLabel : '') +
+        '</p>' : '') +
+      (place.isOpen === true  ? '<span style="font-size: 11px; color: #2a6b5c; background: rgba(42,107,92,0.1); padding: 2px 6px; border-radius: 2px;">Open now</span>' : '') +
+      (place.isOpen === false ? '<span style="font-size: 11px; color: #c9512a; background: rgba(201,81,42,0.1); padding: 2px 6px; border-radius: 2px;">Closed</span>' : '') +
+    '</div>';
+
+  infoWindow.setContent(content);
+  infoWindow.open(googleMap, marker);
+}
+
+function highlightCard(index) {
+  document.querySelectorAll('.card').forEach(function(c) { c.classList.remove('highlighted'); });
+  var card = document.querySelector('.card[data-index="' + index + '"]');
+  if (card) {
+    card.classList.add('highlighted');
+    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+function fitMapToBounds(places) {
+  if (!mapsApiLoaded || !googleMap) return;
+  var mapped = places.filter(function(p) { return p.lat != null && p.lng != null; });
+  if (!mapped.length) return;
+  if (mapped.length === 1) {
+    googleMap.setCenter({ lat: mapped[0].lat, lng: mapped[0].lng });
+    googleMap.setZoom(15);
+    return;
+  }
+  var bounds = new google.maps.LatLngBounds();
+  mapped.forEach(function(p) { bounds.extend({ lat: p.lat, lng: p.lng }); });
+  googleMap.fitBounds(bounds, 40);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Helpers
+// ─────────────────────────────────────────────────────────────────────────────
+function priceLevelLabel(level) {
+  return { PRICE_LEVEL_FREE: 'Free', PRICE_LEVEL_INEXPENSIVE: '\u00a3', PRICE_LEVEL_MODERATE: '\u00a3\u00a3', PRICE_LEVEL_EXPENSIVE: '\u00a3\u00a3\u00a3', PRICE_LEVEL_VERY_EXPENSIVE: '\u00a3\u00a3\u00a3\u00a3' }[level] || null;
+}
+
+function starString(rating) {
+  if (!rating) return '';
+  var full = Math.floor(rating);
+  var half = (rating - full) >= 0.4 ? 1 : 0;
+  return '\u2605'.repeat(full) + (half ? '\u00bd' : '') + '\u2606'.repeat(5 - full - half);
+}
+
+function escHtml(str) {
+  var d = document.createElement('div');
+  d.textContent = String(str);
+  return d.innerHTML;
+}
+
 function setStep(n) {
   for (var i = 1; i <= 3; i++) {
     var el = document.getElementById('step' + i);
@@ -704,58 +669,66 @@ function setStep(n) {
   }
 }
 
-// ── Main search ──
+function showError(msg) {
+  var error = document.getElementById('error');
+  error.classList.add('active');
+  error.textContent = msg;
+  document.getElementById('loading').classList.remove('active');
+  document.getElementById('searchBtn').disabled = false;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Main search
+// ─────────────────────────────────────────────────────────────────────────────
 async function searchGozleme() {
   var location = document.getElementById('locationInput').value.trim() || 'Northeast London';
-  var anthropicKey = document.getElementById('anthropicKey').value.trim();
 
-  if (!anthropicKey) {
-    document.getElementById('apiBody').classList.add('open');
-    document.getElementById('apiToggle').classList.add('open');
-    showError('Please enter your Anthropic API key above to search.');
-    return;
-  }
-
-  var btn = document.getElementById('searchBtn');
-  var loading = document.getElementById('loading');
-  var results = document.getElementById('results');
-  var error = document.getElementById('error');
+  var btn           = document.getElementById('searchBtn');
+  var loading       = document.getElementById('loading');
+  var results       = document.getElementById('results');
+  var error         = document.getElementById('error');
   var cardContainer = document.getElementById('cardContainer');
-  var resultsCount = document.getElementById('resultsCount');
+  var resultsCount  = document.getElementById('resultsCount');
 
   btn.disabled = true;
   loading.classList.add('active');
   results.classList.remove('active');
   error.classList.remove('active');
   cardContainer.innerHTML = '';
+  clearMarkers();
   setStep(1);
 
-  var placesResults = [];
-  var aiResults = [];
-  var errors = [];
+  var placesResults = [], aiResults = [], errors = [];
 
-  // Step 1: Google Places (via server proxy — no key needed client-side)
+  // Step 1: Google Places
   try {
     setStep(1);
     placesResults = await fetchGooglePlaces('gozleme ' + location + ' London');
-  } catch(e) {
-    errors.push(e.message);
-  }
+  } catch(e) { errors.push(e.message); }
 
   // Step 2: Claude AI
   try {
     setStep(2);
-    var knownNames = placesResults.map(function(p) { return p.name; });
-    aiResults = await fetchClaudeResults(location, anthropicKey, knownNames);
-  } catch(e) {
-    errors.push(e.message);
-  }
+    aiResults = await fetchClaudeResults(location, placesResults.map(function(p) { return p.name; }));
+  } catch(e) { errors.push(e.message); }
 
-  // Step 3: Merge
+  // Step 3: Geocode AI results + build map
   setStep(3);
-  await new Promise(function(r) { setTimeout(r, 300); });
 
   var allPlaces = dedupe(placesResults, aiResults);
+
+  // Geocode AI results that have an address but no coordinates
+  if (mapsApiLoaded) {
+    var geocodePromises = allPlaces.map(async function(place) {
+      if (place.lat == null && place.address) {
+        var coords = await geocodeAddress(place.address);
+        if (coords) { place.lat = coords.lat; place.lng = coords.lng; }
+      }
+    });
+    await Promise.all(geocodePromises);
+  }
+
+  await new Promise(function(r) { setTimeout(r, 200); });
 
   loading.classList.remove('active');
   btn.disabled = false;
@@ -763,17 +736,17 @@ async function searchGozleme() {
   if (allPlaces.length === 0) {
     showError(errors.length
       ? 'Could not retrieve results. ' + errors.join(' | ')
-      : 'No Gozleme spots found near "' + location + '". Try a broader area like "East London" or "London".'
+      : 'No results found near "' + location + '". Try "East London" or "London".'
     );
     return;
   }
 
   if (errors.length) {
     error.classList.add('active');
-    error.textContent = 'Partial results only: ' + errors.join(' | ');
+    error.textContent = 'Partial results: ' + errors.join(' | ');
   }
 
-  // Sort: Places (with ratings) first, then by rating desc
+  // Sort: Places first, then by rating
   allPlaces.sort(function(a, b) {
     if (a.source === 'places' && b.source !== 'places') return -1;
     if (b.source === 'places' && a.source !== 'places') return 1;
@@ -784,17 +757,20 @@ async function searchGozleme() {
   results.classList.add('active');
 
   var placesCount = allPlaces.filter(function(p) { return p.source === 'places'; }).length;
-  var aiCount = allPlaces.filter(function(p) { return p.source === 'ai'; }).length;
+  var aiCount     = allPlaces.filter(function(p) { return p.source === 'ai'; }).length;
   var parts = [];
   if (placesCount) parts.push(placesCount + ' from Google');
-  if (aiCount) parts.push(aiCount + ' from AI');
+  if (aiCount)     parts.push(aiCount + ' from AI');
   resultsCount.textContent = allPlaces.length + ' spot' + (allPlaces.length !== 1 ? 's' : '') + ' \u00b7 ' + parts.join(', ');
 
+  // Render cards + markers
   allPlaces.forEach(function(place, i) {
+    // Card
     var card = document.createElement('div');
     card.className = 'card source-' + place.source;
     card.dataset.source = place.source;
-    card.style.animationDelay = (i * 0.05) + 's';
+    card.dataset.index  = i;
+    card.style.animationDelay = (i * 0.04) + 's';
 
     var mapsUrl = place.mapsUrl ||
       'https://www.google.com/maps/search/' + encodeURIComponent((place.name || '') + ' ' + (place.address || '') + ' London');
@@ -810,15 +786,13 @@ async function searchGozleme() {
     var priceLabel = priceLevelLabel(place.priceLevel);
     if (priceLabel) metaHtml += '<span class="price-level">' + priceLabel + '</span>';
 
-    var sourceBadge = place.source === 'places'
-      ? '<span class="source-badge places">Google Places</span>'
-      : '<span class="source-badge ai">Claude AI</span>';
-
+    var sourceBadge = '<span class="source-badge ' + place.source + '">' + (place.source === 'places' ? 'Google Places' : 'Claude AI') + '</span>';
     var tags = (place.tags || []).map(function(t, idx) {
       return '<span class="tag ' + (idx % 2 === 0 ? 'red' : 'green') + '">' + escHtml(t) + '</span>';
     }).join('');
 
     card.innerHTML =
+      '<div class="card-num">' + (i + 1) + '</div>' +
       '<div class="card-left">' +
         '<h3 class="card-name">' + escHtml(place.name || 'Unknown') + '</h3>' +
         '<p class="card-address">&#128205; ' + escHtml(place.address || place.area || 'London') + '</p>' +
@@ -828,39 +802,40 @@ async function searchGozleme() {
       '</div>' +
       '<div class="card-right">' +
         '<span class="card-area">' + escHtml(place.area || '') + '</span>' +
-        '<a href="' + mapsUrl + '" target="_blank" rel="noopener" class="maps-link">Map &#8594;</a>' +
+        '<a href="' + mapsUrl + '" target="_blank" rel="noopener" class="maps-link" onclick="event.stopPropagation()">Map &#8594;</a>' +
       '</div>';
 
+    // Click card → pan map to marker
+    (function(placeRef, idx) {
+      card.addEventListener('click', function() {
+        if (mapsApiLoaded && googleMap && mapMarkers[idx]) {
+          googleMap.panTo(mapMarkers[idx].getPosition());
+          googleMap.setZoom(15);
+          openInfoWindow(mapMarkers[idx], placeRef);
+          highlightCard(idx);
+        }
+      });
+    })(place, i);
+
     cardContainer.appendChild(card);
+
+    // Map marker
+    addMarker(place, i);
   });
+
+  // Fit map to all markers
+  fitMapToBounds(allPlaces);
 }
 
-function showError(msg) {
-  var error = document.getElementById('error');
-  error.classList.add('active');
-  error.textContent = msg;
-  document.getElementById('loading').classList.remove('active');
-  document.getElementById('searchBtn').disabled = false;
-}
-
-function escHtml(str) {
-  var d = document.createElement('div');
-  d.textContent = String(str);
-  return d.innerHTML;
-}
-
-// ── Init ──
+// ─────────────────────────────────────────────────────────────────────────────
+// Init
+// ─────────────────────────────────────────────────────────────────────────────
 document.getElementById('locationInput').addEventListener('keydown', function(e) {
   if (e.key === 'Enter') searchGozleme();
 });
 
-loadKeys();
-
-// Auto-open API panel if no Anthropic key saved yet
-if (!sessionStorage.getItem('anthropic_key')) {
-  document.getElementById('apiBody').classList.add('open');
-  document.getElementById('apiToggle').classList.add('open');
-}
+// Load Maps API in the background immediately
+loadMapsApi();
 </script>
 </body>
 </html>
