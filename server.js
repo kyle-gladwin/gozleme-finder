@@ -14,10 +14,11 @@
 
 require('dotenv').config();
 
-const express = require('express');
-const cors    = require('cors');
-const path    = require('path');
-const fs      = require('fs');
+const express     = require('express');
+const cors        = require('cors');
+const path        = require('path');
+const fs          = require('fs');
+const compression = require('compression');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -30,6 +31,10 @@ const ANTHROPIC_KEY     = process.env.ANTHROPIC_KEY     || '';
 
 // ── Middleware ──────────────────────────────────────────────────────────────
 app.use(cors());
+
+// Compress all responses — reduces payload size by 60-80%
+app.use(compression());
+
 // Force HTTPS — redirect any http requests to https
 app.use((req, res, next) => {
   if (req.headers['x-forwarded-proto'] && req.headers['x-forwarded-proto'] !== 'https') {
@@ -37,10 +42,14 @@ app.use((req, res, next) => {
   }
   next();
 });
+
 app.use(express.json());
 
-// Serve static files
-app.use(express.static(path.join(__dirname)));
+// Serve static files with 1-day cache for repeat visitors
+app.use(express.static(path.join(__dirname), {
+  maxAge: '1d',
+  etag:   true,
+}));
 
 // Root → frontend
 app.get('/', (req, res) => {
