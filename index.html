@@ -575,7 +575,7 @@ async function geocodeAddress(address) {
     var resp = await fetch('/api/geocode', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ address: address + ', London, UK' })
+      body: JSON.stringify({ address: address })
     });
     if (!resp.ok) return null;
     var data = await resp.json();
@@ -893,8 +893,9 @@ async function searchGozleme() {
   // Step 1a: Geocode the search location first so review search uses precise coords
   var searchCoordsEarly = { lat: 51.5074, lng: -0.1278 }; // fallback: central London
   try {
-    var earlyCoords = await geocodeAddress(location + ', London');
+    var earlyCoords = await geocodeAddress(location);
     if (earlyCoords) searchCoordsEarly = earlyCoords;
+    console.log('Search centre: ' + searchCoordsEarly.lat.toFixed(4) + ', ' + searchCoordsEarly.lng.toFixed(4));
   } catch(e) {}
 
   // Step 1b: Direct gözleme search + searchNearby review-filtered + curated list, in parallel
