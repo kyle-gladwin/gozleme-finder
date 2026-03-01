@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gözleme Finder — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:         #f5ede0;
+    --ink:        #1a1008;
+    --cream:      #fdf6ec;
+    --smoke:      #e8ddd0;
+    --terracotta: #c9512a;
+    --gold:       #d4a017;
+    --accent:     #2a6b5c;
+    --muted:      #8a7060;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+  }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 0 24px; }
+
+  /* ── Header ── */
+  header {
+    padding: 36px 0 24px;
+    border-bottom: 1px solid var(--smoke);
+    margin-bottom: 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .header-left h1 {
+    font-family: 'DM Mono', monospace;
+    font-size: 20px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+
+  .header-left p {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .back-link {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--terracotta);
+    text-decoration: none;
+  }
+  .back-link:hover { text-decoration: underline; }
+
+  /* ── Stats bar ── */
+  .stats {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .stat {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .stat strong {
+    display: block;
+    font-size: 22px;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+    margin-bottom: 2px;
+  }
+
+  .stat.hidden-stat strong { color: var(--terracotta); }
+  .stat.visible-stat strong { color: var(--accent); }
+
+  /* ── Filter tabs ── */
+  .filter-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .filter-btn {
+    padding: 5px 14px;
+    border: 1.5px solid var(--smoke);
+    border-radius: 2px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    background: none;
+    color: var(--muted);
+    transition: all 0.15s;
+  }
+  .filter-btn:hover { border-color: var(--terracotta); color: var(--terracotta); }
+  .filter-btn.active { background: var(--ink); border-color: var(--ink); color: white; }
+
+  .search-input {
+    margin-left: auto;
+    padding: 6px 14px;
+    border: 1.5px solid var(--smoke);
+    border-radius: 2px;
+    background: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--ink);
+    outline: none;
+    width: 220px;
+    transition: border-color 0.2s;
+  }
+  .search-input:focus { border-color: var(--terracotta); }
+  .search-input::placeholder { color: var(--muted); }
+
+  /* ── Empty / loading states ── */
+  .state-msg {
+    text-align: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    padding: 48px 0;
+  }
+
+  /* ── Spot list ── */
+  .spot-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 48px; }
+
+  .spot-card {
+    background: var(--cream);
+    border: 1px solid var(--smoke);
+    border-radius: 2px;
+    padding: 14px 18px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 16px;
+    align-items: center;
+    transition: all 0.18s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .spot-card::before {
+    content: '';
+    position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+    background: var(--accent);
+    transition: background 0.2s;
+  }
+
+  .spot-card.is-hidden {
+    opacity: 0.5;
+    background: var(--bg);
+  }
+  .spot-card.is-hidden::before { background: var(--terracotta); }
+
+  .spot-name {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 2px;
+  }
+
+  .spot-meta {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 300;
+    line-height: 1.5;
+  }
+
+  .spot-area {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .spot-controls { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+  .status-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 2px;
+    border: 1px solid;
+  }
+  .status-badge.visible { color: var(--accent);     border-color: rgba(42,107,92,0.4);  background: rgba(42,107,92,0.08); }
+  .status-badge.hidden  { color: var(--terracotta); border-color: rgba(201,81,42,0.4);  background: rgba(201,81,42,0.08); }
+
+  .toggle-btn {
+    padding: 6px 14px;
+    border: 1.5px solid var(--ink);
+    border-radius: 2px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    background: none;
+    color: var(--ink);
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .toggle-btn:hover { background: var(--ink); color: white; }
+  .toggle-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .toggle-btn.hide-btn:hover  { background: var(--terracotta); border-color: var(--terracotta); color: white; }
+  .toggle-btn.show-btn        { border-color: var(--accent); color: var(--accent); }
+  .toggle-btn.show-btn:hover  { background: var(--accent); border-color: var(--accent); color: white; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="header-left">
+      <h1>Gözleme Finder — Admin</h1>
+      <p id="cacheDate">Loading cache...</p>
+    </div>
+    <a href="/" class="back-link">← Back to site</a>
+  </header>
+
+  <div class="stats">
+    <div class="stat">
+      <strong id="statTotal">—</strong>
+      Total spots
+    </div>
+    <div class="stat visible-stat">
+      <strong id="statVisible">—</strong>
+      Visible
+    </div>
+    <div class="stat hidden-stat">
+      <strong id="statHidden">—</strong>
+      Hidden
+    </div>
+  </div>
+
+  <div class="filter-row">
+    <button class="filter-btn active" data-filter="all"     onclick="setFilter(this, 'all')">All</button>
+    <button class="filter-btn"        data-filter="visible" onclick="setFilter(this, 'visible')">Visible</button>
+    <button class="filter-btn"        data-filter="hidden"  onclick="setFilter(this, 'hidden')">Hidden</button>
+    <input class="search-input" type="text" placeholder="Search spots..." oninput="renderList()">
+  </div>
+
+  <div id="stateMsg" class="state-msg">Loading spots...</div>
+  <div class="spot-list" id="spotList"></div>
+
+</div>
+
+<script>
+var allSpots  = [];
+var curFilter = 'all';
+
+async function loadSpots() {
+  try {
+    var resp = await fetch('/api/admin/spots');
+    var data = await resp.json();
+
+    if (!resp.ok) throw new Error(data.error || 'Failed to load');
+
+    allSpots = data.spots || [];
+
+    var date = data.builtAt
+      ? 'Cache built ' + new Date(data.builtAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+      : 'No cache found — run cache-builder.js first';
+    document.getElementById('cacheDate').textContent = date;
+
+    updateStats();
+    renderList();
+  } catch(e) {
+    document.getElementById('stateMsg').textContent = 'Error: ' + e.message;
+  }
+}
+
+function updateStats() {
+  var hidden  = allSpots.filter(function(s) { return s.hidden; }).length;
+  var visible = allSpots.length - hidden;
+  document.getElementById('statTotal').textContent   = allSpots.length;
+  document.getElementById('statVisible').textContent = visible;
+  document.getElementById('statHidden').textContent  = hidden;
+}
+
+function setFilter(btn, filter) {
+  curFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  renderList();
+}
+
+function renderList() {
+  var query = document.querySelector('.search-input').value.toLowerCase().trim();
+
+  var filtered = allSpots.filter(function(s, i) {
+    s._index = i; // preserve original index for toggle calls
+    if (curFilter === 'visible' && s.hidden) return false;
+    if (curFilter === 'hidden'  && !s.hidden) return false;
+    if (query) {
+      var haystack = ((s.name || '') + ' ' + (s.area || '') + ' ' + (s.address || '')).toLowerCase();
+      if (!haystack.includes(query)) return false;
+    }
+    return true;
+  });
+
+  var list = document.getElementById('spotList');
+  var msg  = document.getElementById('stateMsg');
+
+  if (allSpots.length === 0) {
+    msg.textContent = 'No spots in cache — run cache-builder.js first.';
+    msg.style.display = 'block';
+    list.innerHTML = '';
+    return;
+  }
+
+  if (filtered.length === 0) {
+    msg.textContent = 'No spots match.';
+    msg.style.display = 'block';
+    list.innerHTML = '';
+    return;
+  }
+
+  msg.style.display = 'none';
+
+  list.innerHTML = filtered.map(function(s) {
+    var isHidden = !!s.hidden;
+    return '<div class="spot-card ' + (isHidden ? 'is-hidden' : '') + '" id="card-' + s._index + '">' +
+      '<div>' +
+        '<div class="spot-name">' + escHtml(s.name || 'Unknown') + '</div>' +
+        '<div class="spot-meta">' + escHtml(s.address || s.area || '') + '</div>' +
+        (s.description ? '<div class="spot-meta">' + escHtml(s.description.substring(0, 100)) + (s.description.length > 100 ? '...' : '') + '</div>' : '') +
+        '<div class="spot-area">' + escHtml(s.area || '') + '</div>' +
+      '</div>' +
+      '<div class="spot-controls">' +
+        '<span class="status-badge ' + (isHidden ? 'hidden' : 'visible') + '">' + (isHidden ? 'Hidden' : 'Visible') + '</span>' +
+        '<button class="toggle-btn ' + (isHidden ? 'show-btn' : 'hide-btn') + '" onclick="toggle(' + s._index + ', this)">' +
+          (isHidden ? 'Show' : 'Hide') +
+        '</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+async function toggle(index, btn) {
+  btn.disabled = true;
+  try {
+    var resp = await fetch('/api/admin/toggle', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ index: index }),
+    });
+    var data = await resp.json();
+    if (!resp.ok) throw new Error(data.error || 'Toggle failed');
+
+    // Update local state
+    allSpots[index].hidden = data.hidden;
+    updateStats();
+    renderList();
+  } catch(e) {
+    alert('Error: ' + e.message);
+    btn.disabled = false;
+  }
+}
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+loadSpots();
+</script>
+</body>
+</html>

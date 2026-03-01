@@ -282,7 +282,6 @@
 <div class="container">
 
   <header>
-    <p class="eyebrow">🫓 Turkish Street Food Finder</p>
     <h1>Find <em>Gözleme</em><br>Near You</h1>
     <p class="subtitle">Live results from Google Places combined with AI knowledge, mapped across London.</p>
   </header>
@@ -896,13 +895,21 @@ async function searchGozleme() {
   // Merge all three sources: direct Places, review-filtered Places, AI
   var allPlaces = dedupeAll(placesResults, reviewResults, curatedResults, aiResults);
 
-  // Geocode AI results that have an address but no coordinates
+  // Geocode results that have no coordinates — try address first, fall back to name + area
   if (mapsApiLoaded) {
     var geocodePromises = allPlaces.map(async function(place) {
-      if (place.lat == null && place.address) {
-        var coords = await geocodeAddress(place.address);
-        if (coords) { place.lat = coords.lat; place.lng = coords.lng; }
+      if (place.lat != null) return; // already has coords
+      var coords = null;
+      if (place.address) {
+        coords = await geocodeAddress(place.address);
       }
+      if (!coords && place.name && place.area) {
+        coords = await geocodeAddress(place.name + ', ' + place.area);
+      }
+      if (!coords && place.name) {
+        coords = await geocodeAddress(place.name);
+      }
+      if (coords) { place.lat = coords.lat; place.lng = coords.lng; }
     });
     await Promise.all(geocodePromises);
   }
@@ -915,7 +922,7 @@ async function searchGozleme() {
   if (allPlaces.length === 0) {
     showError(errors.length
       ? 'Could not retrieve results. ' + errors.join(' | ')
-      : 'No results found near "' + location + '". Try "East London" or "London".'
+      : 'No results found near "' + location + '". Try a broader area, a postcode, or just "London".'
     );
     return;
   }

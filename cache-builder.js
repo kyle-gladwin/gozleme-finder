@@ -16,10 +16,45 @@ const fs    = require('fs');
 const path  = require('path');
 const https = require('https');
 
-const ANTHROPIC_KEY = process.env.ANTHROPIC_KEY;
+const ANTHROPIC_KEY  = process.env.ANTHROPIC_KEY;
+const GOOGLE_MAPS_KEY = process.env.GOOGLE_MAPS_KEY || process.env.GOOGLE_PLACES_KEY;
+
 if (!ANTHROPIC_KEY) {
   console.error('Error: ANTHROPIC_KEY not set in .env');
   process.exit(1);
+}
+
+// Geocode a place using Google Geocoding API
+async function geocodeSpot(spot) {
+  if (!GOOGLE_MAPS_KEY) return;
+
+  // Try address first, then name + area
+  const queries = [];
+  if (spot.address) queries.push(spot.address + ', London, UK');
+  if (spot.name && spot.area) queries.push(spot.name + ', ' + spot.area + ', London, UK');
+  if (spot.name) queries.push(spot.name + ', London, UK');
+
+  for (const query of queries) {
+    try {
+      const url = 'https://maps.googleapis.com/maps/api/geocode/json?address='
+        + encodeURIComponent(query)
+        + '&key=' + GOOGLE_MAPS_KEY;
+
+      const data = await new Promise((resolve, reject) => {
+        https.get(url, (res) => {
+          let raw = '';
+          res.on('data', chunk => raw += chunk);
+          res.on('end', () => { try { resolve(JSON.parse(raw)); } catch(e) { reject(e); } });
+        }).on('error', reject);
+      });
+
+      if (data.status === 'OK' && data.results.length) {
+        spot.lat = data.results[0].geometry.location.lat;
+        spot.lng = data.results[0].geometry.location.lng;
+        return; // success — stop trying
+      }
+    } catch(e) { /* try next query */ }
+  }
 }
 
 // London areas to query — broad enough to cover the whole city
@@ -178,6 +213,23 @@ async function build() {
     if (i < AREAS.length - 1) await sleep(1500);
   }
 
+  // Geocode all spots in batches so they have lat/lng for the map
+  if (GOOGLE_MAPS_KEY) {
+    console.log('\nGeocoding ' + allSpots.length + ' spots...');
+    const BATCH = 5;
+    let geocoded = 0;
+    for (let i = 0; i < allSpots.length; i += BATCH) {
+      await Promise.all(allSpots.slice(i, i + BATCH).map(geocodeSpot));
+      geocoded = Math.min(i + BATCH, allSpots.length);
+      process.stdout.write('\r  ' + geocoded + '/' + allSpots.length + ' geocoded...');
+      await sleep(200); // stay within rate limits
+    }
+    const withCoords = allSpots.filter(s => s.lat != null).length;
+    console.log('\n  ' + withCoords + '/' + allSpots.length + ' spots successfully geocoded');
+  } else {
+    console.log('\nSkipping geocoding — GOOGLE_MAPS_KEY not set');
+  }
+
   const output = {
     builtAt:    new Date().toISOString(),
     totalSpots: allSpots.length,
@@ -187,8 +239,10 @@ async function build() {
   const outPath = path.join(__dirname, 'cache.json');
   fs.writeFileSync(outPath, JSON.stringify(output, null, 2), 'utf8');
 
+  const withCoords = allSpots.filter(s => s.lat != null).length;
   console.log('\n================================');
   console.log('Done! ' + allSpots.length + ' unique spots saved to cache.json');
+  console.log('     ' + withCoords + ' with map coordinates');
   console.log('================================\n');
 }
 
