@@ -473,11 +473,13 @@ function filterCards(btn) {
 // ─────────────────────────────────────────────────────────────────────────────
 // Google Places proxy
 // ─────────────────────────────────────────────────────────────────────────────
-async function fetchGooglePlaces(query) {
+async function fetchGooglePlaces(query, coords) {
+  var lat = (coords && coords.lat) ? coords.lat : 51.5074;
+  var lng = (coords && coords.lng) ? coords.lng : -0.1278;
   var resp = await fetch('/api/places', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ textQuery: query, latitude: 51.5200, longitude: -0.0700, radius: 15000, maxResults: 20 })
+    body: JSON.stringify({ textQuery: query, latitude: lat, longitude: lng, radius: 15000, maxResults: 20 })
   });
   var data = await resp.json();
   if (!resp.ok) throw new Error(data.error || 'Google Places proxy error');
@@ -591,7 +593,7 @@ var _cachedSpots = null; // in-memory so we only fetch cache.json once per sessi
 
 // CACHE_RADIUS_KM — how far from the search centre to include cached spots.
 // Matches the 15km radius used by the direct Google Places search.
-var CACHE_RADIUS_KM = 15;
+var CACHE_RADIUS_KM = 5; // ~neighbourhood level — tighter than Google Places to keep results local
 
 async function fetchAiSpots(location, knownNames, searchCoords) {
   // Load cache once per session
@@ -880,7 +882,7 @@ async function searchGozleme() {
   // Step 1b: Direct gözleme search + searchNearby review-filtered + curated list, in parallel
   try {
     setStep(1);
-    var directSearch  = fetchGooglePlaces('gozleme ' + location + ' London');
+    var directSearch  = fetchGooglePlaces('gozleme ' + location + ' London', searchCoordsEarly);
     var reviewSearch  = fetchPlacesByReview(searchCoordsEarly.lat, searchCoordsEarly.lng);
     var curatedSearch = fetchCuratedSpots();
     var step1Results  = await Promise.allSettled([directSearch, reviewSearch, curatedSearch]);
