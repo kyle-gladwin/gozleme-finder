@@ -129,6 +129,15 @@
   }
   .search-btn:hover { background: #b04422; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(201,81,42,0.3); }
   .search-btn:disabled { background: #c4a898; transform: none; box-shadow: none; cursor: not-allowed; }
+  .locate-btn {
+    flex-shrink: 0; width: 44px; padding: 12px 0; border-radius: 2px;
+    border: 1.5px solid var(--smoke); background: var(--cream);
+    color: var(--ink); cursor: pointer; display: flex; align-items: center;
+    justify-content: center; transition: all 0.15s; box-sizing: border-box;
+  }
+  .locate-btn:hover { border-color: var(--terracotta); color: var(--terracotta); }
+  .locate-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .locate-btn svg { width: 18px; height: 18px; }
 
   /* ── Loading ── */
   .loading { text-align: center; padding: 48px 0; display: none; }
@@ -158,17 +167,30 @@
     margin-bottom: 16px; flex-wrap: wrap; gap: 8px;
   }
   .results-title { font-family: 'Playfair Display', serif; font-size: 24px; }
+  .sort-toggle { display: flex; }
+  .sort-btn {
+    font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.08em;
+    text-transform: uppercase; cursor: pointer; background: none;
+    color: var(--muted); border: 1.5px solid var(--smoke); padding: 4px 12px; transition: all 0.15s;
+  }
+  .sort-btn:first-child { border-radius: 2px 0 0 2px; border-right: none; }
+  .sort-btn:last-child  { border-radius: 0 2px 2px 0; }
+  .sort-btn.active { background: var(--ink); border-color: var(--ink); color: white; }
+  .sort-btn:hover:not(.active) { border-color: var(--terracotta); color: var(--terracotta); }
+  .sort-toggle { display: flex; gap: 0; align-items: center; }
+  .sort-btn {
+    font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em;
+    text-transform: uppercase; cursor: pointer; background: none;
+    color: #8a7060; border: 1.5px solid var(--smoke);
+    padding: 4px 12px; transition: all 0.15s;
+  }
+  .sort-btn:first-child { border-radius: 2px 0 0 2px; border-right: none; }
+  .sort-btn:last-child  { border-radius: 0 2px 2px 0; }
+  .sort-btn.active { background: var(--ink); border-color: var(--ink); color: white; }
+  .sort-btn:hover:not(.active) { border-color: var(--terracotta); color: var(--terracotta); }
   .results-count { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--terracotta); letter-spacing: 0.1em; }
 
-  /* Source filter tabs */
-  .source-tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
-  .source-tab {
-    padding: 5px 13px; border: 1.5px solid var(--smoke); border-radius: 2px;
-    font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em;
-    text-transform: uppercase; cursor: pointer; background: none; color: #8a7060; transition: all 0.15s;
-  }
-  .source-tab:hover { border-color: var(--terracotta); color: var(--terracotta); }
-  .source-tab.active { background: var(--ink); border-color: var(--ink); color: white; }
+
 
   /* ── Full-width map above results ── */
   .map-section {
@@ -211,7 +233,7 @@
   .card {
     background: var(--cream); border: 1px solid var(--smoke); border-radius: 2px;
     padding: 18px 22px; cursor: pointer;
-    display: grid; grid-template-columns: 28px 1fr auto;
+    display: grid; grid-template-columns: 1fr auto;
     gap: 12px; align-items: start;
     transition: all 0.18s; position: relative; overflow: hidden;
     animation: fadeInUp 0.3s ease both;
@@ -290,7 +312,7 @@
   }
 
   @media (max-width: 600px) {
-    .card { grid-template-columns: 24px 1fr; }
+    .card { grid-template-columns: 1fr; }
     .card-right { display: none; }
   }
 </style>
@@ -314,22 +336,18 @@
                oninput="toggleClearBtn()">
         <button class="clear-btn" id="clearBtn" onclick="clearSearch()" title="Clear">&#x2715;</button>
       </div>
+      <button class="locate-btn" id="locateBtn" onclick="useMyLocation()" title="Use my location">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <line x1="12" y1="2" x2="12" y2="6"/>
+          <line x1="12" y1="18" x2="12" y2="22"/>
+          <line x1="2" y1="12" x2="6" y2="12"/>
+          <line x1="18" y1="12" x2="22" y2="12"/>
+        </svg>
+      </button>
       <button class="search-btn" id="searchBtn" onclick="searchGozleme()">Search</button>
     </div>
-    <div class="source-checks">
-      <label class="source-check">
-        <input type="checkbox" id="chkPlaces" checked> Google Places
-      </label>
-      <label class="source-check">
-        <input type="checkbox" id="chkReviews" checked> Via Reviews
-      </label>
-      <label class="source-check">
-        <input type="checkbox" id="chkCurated" checked> Curated
-      </label>
-      <label class="source-check">
-        <input type="checkbox" id="chkAI" checked> AI Cache
-      </label>
-    </div>
+
   </div>
 
   <!-- Loading -->
@@ -359,17 +377,13 @@
   <!-- Results -->
   <div class="results" id="results">
     <div class="results-header">
-      <h2 class="results-title">Spots Found</h2>
-      <span class="results-count" id="resultsCount"></span>
+      <h2 class="results-title" id="resultsCount">Spots Found</h2>
+      <div class="sort-toggle">
+        <button class="sort-btn active" id="sortDistance" onclick="setSort('distance')">Distance</button>
+        <button class="sort-btn"        id="sortRating"   onclick="setSort('rating')">Rating</button>
+      </div>
     </div>
 
-    <div class="source-tabs">
-      <button class="source-tab active" data-filter="all"    onclick="filterCards(this)">All</button>
-      <button class="source-tab"        data-filter="places" onclick="filterCards(this)">Google Places</button>
-      <button class="source-tab"        data-filter="ai"     onclick="filterCards(this)">AI Only</button>
-      <button class="source-tab"        data-filter="review"   onclick="filterCards(this)">Via Reviews</button>
-      <button class="source-tab"        data-filter="curated" onclick="filterCards(this)">⭐ Curated</button>
-    </div>
 
     <div class="results-body">
       <div class="card-list" id="cardContainer"></div>
@@ -387,11 +401,41 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // State
 // ─────────────────────────────────────────────────────────────────────────────
-var googleMap      = null;
-var mapMarkers     = [];
-var infoWindow     = null;
-var mapsApiLoaded  = false;
+var googleMap        = null;
+var mapMarkers       = [];
+var infoWindow       = null;
+var mapsApiLoaded    = false;
 var mapsKeyAvailable = false;
+var _allPlaces       = [];
+var _currentSort     = 'distance';
+var _searchMarker    = null;
+var _allPlaces     = [];   // stored after search for re-sorting
+var _currentSort   = 'distance';
+
+function setSort(mode) {
+  _currentSort = mode;
+  document.getElementById('sortDistance').classList.toggle('active', mode === 'distance');
+  document.getElementById('sortRating').classList.toggle('active', mode === 'rating');
+  if (_allPlaces.length) renderCards(_allPlaces);
+}
+
+function sortPlaces(places) {
+  var sorted = places.slice();
+  if (_currentSort === 'rating') {
+    sorted.sort(function(a, b) {
+      if ((b.rating || 0) !== (a.rating || 0)) return (b.rating || 0) - (a.rating || 0);
+      return (a.distance || Infinity) - (b.distance || Infinity);
+    });
+  } else {
+    sorted.sort(function(a, b) {
+      if (a.distance == null && b.distance == null) return 0;
+      if (a.distance == null) return 1;
+      if (b.distance == null) return -1;
+      return a.distance - b.distance;
+    });
+  }
+  return sorted;
+}
 
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -474,32 +518,6 @@ async function runDefaultSearch() {
 // ─────────────────────────────────────────────────────────────────────────────
 // Filter tabs
 // ─────────────────────────────────────────────────────────────────────────────
-function filterCards(btn) {
-  document.querySelectorAll('.source-tab').forEach(function(t) { t.classList.remove('active'); });
-  btn.classList.add('active');
-  var filter = btn.dataset.filter;
-  document.querySelectorAll('.card').forEach(function(card) {
-    var src = card.dataset.source;
-    card.style.display =
-      (filter === 'all') ||
-      (filter === 'places'  && src === 'places') ||
-      (filter === 'ai'      && src === 'ai') ||
-      (filter === 'review'  && src === 'review') ||
-      (filter === 'curated' && src === 'curated')
-        ? '' : 'none';
-  });
-  // Update map marker visibility to match
-  mapMarkers.forEach(function(m) {
-    var src = m.placeSource;
-    m.setVisible(
-      filter === 'all' ||
-      (filter === 'places'  && src === 'places') ||
-      (filter === 'ai'      && src === 'ai') ||
-      (filter === 'review'  && src === 'review') ||
-      (filter === 'curated' && src === 'curated')
-    );
-  });
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Google Places proxy
@@ -767,17 +785,38 @@ function clearMarkers() {
   mapMarkers = [];
 }
 
+function placeSearchMarker(coords) {
+  if (_searchMarker) { _searchMarker.setMap(null); _searchMarker = null; }
+  if (!mapsApiLoaded || !googleMap || !coords) return;
+
+  var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="0 0 32 40">'
+    + '<path d="M16 0C7.16 0 0 7.16 0 16c0 10 16 24 16 24S32 26 32 16C32 7.16 24.84 0 16 0z" fill="#e8710a"/>'
+    + '<circle cx="16" cy="16" r="6" fill="white" opacity="0.9"/>'
+    + '</svg>';
+
+  _searchMarker = new google.maps.Marker({
+    position: coords,
+    map: googleMap,
+    title: 'Your search location',
+    icon: {
+      url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
+      scaledSize: new google.maps.Size(32, 40),
+      anchor:     new google.maps.Point(16, 40),
+    },
+    clickable: false,
+    zIndex: 9999,
+  });
+}
+
 function addMarker(place, index) {
   if (!mapsApiLoaded || !googleMap || place.lat == null || place.lng == null) return;
 
-  var colour = place.source === 'places' ? '#1a73e8' : place.source === 'review' ? '#2a6b5c' : place.source === 'curated' ? '#d4a017' : '#c9512a';
-  var num      = (index + 1).toString();
+  var colour = '#1a73e8';
 
-  // Custom SVG pin with number
+  // Plain pin — no number
   var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="0 0 32 40">'
     + '<path d="M16 0C7.16 0 0 7.16 0 16c0 10 16 24 16 24S32 26 32 16C32 7.16 24.84 0 16 0z" fill="' + colour + '"/>'
-    + '<circle cx="16" cy="16" r="10" fill="white" opacity="0.9"/>'
-    + '<text x="16" y="20" text-anchor="middle" font-family="DM Mono, monospace" font-size="10" font-weight="bold" fill="' + colour + '">' + num + '</text>'
+    + '<circle cx="16" cy="16" r="6" fill="white" opacity="0.9"/>'
     + '</svg>';
 
   var marker = new google.maps.Marker({
@@ -807,6 +846,8 @@ function addMarker(place, index) {
 
 function openInfoWindow(marker, place) {
   var priceLabel = priceLevelLabel(place.priceLevel);
+  var mapsUrl = place.mapsUrl ||
+    'https://www.google.com/maps/search/' + encodeURIComponent((place.name || '') + ' ' + (place.address || '') + ' London');
   var content =
     '<div style="font-family: DM Sans, sans-serif; max-width: 220px; padding: 4px;">' +
       '<strong style="font-family: Playfair Display, serif; font-size: 14px;">' + escHtml(place.name) + '</strong>' +
@@ -816,8 +857,11 @@ function openInfoWindow(marker, place) {
         (place.reviewCount ? ' <span style="color: #8a7060;">(' + place.reviewCount.toLocaleString() + ')</span>' : '') +
         (priceLabel ? ' &middot; ' + priceLabel : '') +
         '</p>' : '') +
-      (place.isOpen === true  ? '<span style="font-size: 11px; color: #2a6b5c; background: rgba(42,107,92,0.1); padding: 2px 6px; border-radius: 2px;">Open now</span>' : '') +
-      (place.isOpen === false ? '<span style="font-size: 11px; color: #c9512a; background: rgba(201,81,42,0.1); padding: 2px 6px; border-radius: 2px;">Closed</span>' : '') +
+      (place.isOpen === true  ? '<span style="font-size: 11px; color: #2a6b5c; background: rgba(42,107,92,0.1); padding: 2px 6px; border-radius: 2px; display: inline-block; margin-bottom: 4px;">Open now</span>' : '') +
+      (place.isOpen === false ? '<span style="font-size: 11px; color: #c9512a; background: rgba(201,81,42,0.1); padding: 2px 6px; border-radius: 2px; display: inline-block; margin-bottom: 4px;">Closed</span>' : '') +
+      '<div style="margin-top: 8px;">' +
+        '<a href="' + mapsUrl + '" target="_blank" rel="noopener" style="font-family: DM Mono, monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #c9512a; text-decoration: none; border: 1.5px solid #c9512a; padding: 4px 10px; border-radius: 2px; display: inline-block;">Open in Maps &#8594;</a>' +
+      '</div>' +
     '</div>';
 
   infoWindow.setContent(content);
@@ -829,7 +873,6 @@ function highlightCard(index) {
   var card = document.querySelector('.card[data-index="' + index + '"]');
   if (card) {
     card.classList.add('highlighted');
-    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 }
 
@@ -924,7 +967,7 @@ async function searchGozleme() {
   var results       = document.getElementById('results');
   var error         = document.getElementById('error');
   var cardContainer = document.getElementById('cardContainer');
-  var resultsCount  = document.getElementById('resultsCount');
+  
 
   btn.disabled = true;
   loading.classList.add('active');
@@ -947,10 +990,10 @@ async function searchGozleme() {
   // Step 1b: Direct gözleme search + searchNearby review-filtered + curated list, in parallel
   try {
     setStep(1);
-    var usePlaces  = document.getElementById('chkPlaces').checked;
-    var useReviews = document.getElementById('chkReviews').checked;
-    var useCurated = document.getElementById('chkCurated').checked;
-    var useAI      = document.getElementById('chkAI').checked;
+    var usePlaces  = true;
+    var useReviews = true;
+    var useCurated = true;
+    var useAI      = true;
     var directSearch  = usePlaces  ? fetchGooglePlaces('gozleme ' + location, searchCoordsEarly) : Promise.resolve([]);
     var reviewSearch  = useReviews ? fetchPlacesByReview(searchCoordsEarly.lat, searchCoordsEarly.lng) : Promise.resolve([]);
     var curatedSearch = useCurated ? fetchCuratedSpots() : Promise.resolve([]);
@@ -1026,38 +1069,87 @@ async function searchGozleme() {
     }
   });
 
-  // Sort by distance ascending; places without coords go to the end
+  // Sort by distance so _allPlaces[0] is always the closest
   allPlaces.sort(function(a, b) {
     if (a.distance == null && b.distance == null) return 0;
     if (a.distance == null) return 1;
     if (b.distance == null) return -1;
     return a.distance - b.distance;
   });
-  if (allPlaces[0] && allPlaces[0].distance != null) {
-    console.log('Nearest result: ' + allPlaces[0].name + ' (' + allPlaces[0].distance.toFixed(2) + 'km)');
-  }
+
+  // Store for re-sorting and do initial distance sort
+  _allPlaces = allPlaces;
+  _currentSort = 'distance';
+  document.getElementById('sortDistance').classList.add('active');
+  document.getElementById('sortRating').classList.remove('active');
 
   results.classList.add('active');
 
-  var placesCount   = allPlaces.filter(function(p) { return p.source === 'places'; }).length;
-  var reviewCount   = allPlaces.filter(function(p) { return p.source === 'review'; }).length;
-  var curatedCount  = allPlaces.filter(function(p) { return p.source === 'curated'; }).length;
-  var aiCount       = allPlaces.filter(function(p) { return p.source === 'ai'; }).length;
-  var parts = [];
-  if (placesCount)  parts.push(placesCount + ' direct');
-  if (reviewCount)  parts.push(reviewCount + ' via reviews');
-  if (curatedCount) parts.push(curatedCount + ' curated');
-  if (aiCount)      parts.push(aiCount + ' from AI');
-  resultsCount.textContent = allPlaces.length + ' spot' + (allPlaces.length !== 1 ? 's' : '') + ' \u00b7 ' + parts.join(', ');
+  // Update count summary
+  document.getElementById('resultsCount').textContent = allPlaces.length + ' Spot' + (allPlaces.length !== 1 ? 's' : '') + ' Found';
 
-  // Render cards + markers
-  allPlaces.forEach(function(place, i) {
-    // Card
+  // Draw markers (always in original distance order so index matches mapMarkers array)
+  clearMarkers();
+  allPlaces.forEach(function(place, i) { addMarker(place, i); });
+  placeSearchMarker(searchCentre);
+
+  // Render cards in current sort order
+  renderCards(allPlaces);
+
+  // Fit map to all markers
+  fitMapToBounds(allPlaces, searchCentre);
+
+  // Auto-trigger the closest pin
+  var firstWithMarker = allPlaces.findIndex(function(p, i) { return mapMarkers[i]; });
+  if (firstWithMarker !== -1) {
+    setTimeout(function() {
+      var marker = mapMarkers[firstWithMarker];
+      if (marker) {
+        openInfoWindow(marker, allPlaces[firstWithMarker]);
+        highlightCard(firstWithMarker);
+      }
+    }, 600);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Render / sort helpers
+// ─────────────────────────────────────────────────────────────────────────────
+function setSort(mode) {
+  _currentSort = mode;
+  document.getElementById('sortDistance').classList.toggle('active', mode === 'distance');
+  document.getElementById('sortRating').classList.toggle('active', mode === 'rating');
+  renderCards(_allPlaces);
+}
+
+function renderCards(places) {
+  var cardContainer = document.getElementById('cardContainer');
+  cardContainer.innerHTML = '';
+
+  // Sort a copy — markers stay indexed to original order
+  var sorted = places.slice().sort(function(a, b) {
+    if (_currentSort === 'rating') {
+      var rDiff = (b.rating || 0) - (a.rating || 0);
+      if (rDiff !== 0) return rDiff;
+      // Tiebreak by distance
+      if (a.distance == null) return 1;
+      if (b.distance == null) return -1;
+      return a.distance - b.distance;
+    }
+    // Distance sort (default)
+    if (a.distance == null && b.distance == null) return 0;
+    if (a.distance == null) return 1;
+    if (b.distance == null) return -1;
+    return a.distance - b.distance;
+  });
+
+  sorted.forEach(function(place) {
+    var i = places.indexOf(place); // original index → matches mapMarkers[i]
     var card = document.createElement('div');
     card.className = 'card source-' + place.source;
     card.dataset.source = place.source;
     card.dataset.index  = i;
-    card.style.animationDelay = (i * 0.04) + 's';
+    card.style.animationDelay = '0s';
 
     var mapsUrl = place.mapsUrl ||
       'https://www.google.com/maps/search/' + encodeURIComponent((place.name || '') + ' ' + (place.address || '') + ' London');
@@ -1073,27 +1165,18 @@ async function searchGozleme() {
     var priceLabel = priceLevelLabel(place.priceLevel);
     if (priceLabel) metaHtml += '<span class="price-level">' + priceLabel + '</span>';
 
-    var sourceLabel = place.source === 'places' ? 'Google Places' : place.source === 'review' ? 'Via Reviews' : place.source === 'curated' ? '⭐ Curated' : 'Claude AI';
-    var sourceBadge = '<span class="source-badge ' + place.source + '">' + sourceLabel + '</span>';
-    var tags = (place.tags || []).map(function(t, idx) {
-      return '<span class="tag ' + (idx % 2 === 0 ? 'red' : 'green') + '">' + escHtml(t) + '</span>';
-    }).join('');
-
     card.innerHTML =
-      '<div class="card-num">' + (i + 1) + '</div>' +
       '<div class="card-left">' +
         '<h3 class="card-name">' + escHtml(place.name || 'Unknown') + '</h3>' +
         '<p class="card-address">&#128205; ' + escHtml(place.address || place.area || 'London') + '</p>' +
         (place.description ? '<p class="card-desc">' + escHtml(place.description) + '</p>' : '') +
         (metaHtml ? '<div class="card-meta">' + metaHtml + '</div>' : '') +
-        '<div class="card-tags">' + sourceBadge + tags + '</div>' +
       '</div>' +
       '<div class="card-right">' +
         (place.distance != null ? '<span class="card-dist">' + (place.distance < 1 ? Math.round(place.distance * 1000) + 'm' : place.distance.toFixed(1) + 'km') + '</span>' : '<span class="card-area">' + escHtml(place.area || '') + '</span>') +
         '<a href="' + mapsUrl + '" target="_blank" rel="noopener" class="maps-link" onclick="event.stopPropagation()">Map &#8594;</a>' +
       '</div>';
 
-    // Click card → pan map to marker
     (function(placeRef, idx) {
       card.addEventListener('click', function() {
         if (mapsApiLoaded && googleMap && mapMarkers[idx]) {
@@ -1106,18 +1189,52 @@ async function searchGozleme() {
     })(place, i);
 
     cardContainer.appendChild(card);
-
-    // Map marker
-    addMarker(place, i);
   });
-
-  // Fit map to all markers
-  fitMapToBounds(allPlaces, searchCentre);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Init
 // ─────────────────────────────────────────────────────────────────────────────
+function useMyLocation() {
+  if (!navigator.geolocation) {
+    alert('Geolocation is not supported by your browser.');
+    return;
+  }
+  var btn = document.getElementById('locateBtn');
+  btn.disabled = true;
+  navigator.geolocation.getCurrentPosition(
+    function(pos) {
+      btn.disabled = false;
+      var lat = pos.coords.latitude;
+      var lng = pos.coords.longitude;
+      // Reverse geocode to get a human-readable location string
+      fetch('/api/geocode-reverse', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lat: lat, lng: lng })
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var label = data.label || (lat.toFixed(4) + ', ' + lng.toFixed(4));
+        document.getElementById('locationInput').value = label;
+        toggleClearBtn();
+        searchGozleme();
+      })
+      .catch(function() {
+        // Fallback: use raw coords as the search input
+        document.getElementById('locationInput').value = lat.toFixed(6) + ',' + lng.toFixed(6);
+        toggleClearBtn();
+        searchGozleme();
+      });
+    },
+    function(err) {
+      btn.disabled = false;
+      alert('Could not get your location. Please check your browser permissions.');
+    },
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
+}
+
 function toggleClearBtn() {
   var val = document.getElementById('locationInput').value;
   var btn = document.getElementById('clearBtn');

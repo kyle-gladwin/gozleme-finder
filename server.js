@@ -357,6 +357,51 @@ app.post('/api/geocode', async (req, res) => {
 });
 
 
+// ── Reverse geocoding proxy ───────────────────────────────────────────────────
+// POST /api/geocode-reverse
+// Body: { lat, lng }
+// Returns: { label } — a human-readable location name (neighbourhood / postcode)
+app.post('/api/geocode-reverse', async (req, res) => {
+  const apiKey = GOOGLE_MAPS_KEY;
+  if (!apiKey) return res.status(400).json({ error: 'GOOGLE_MAPS_KEY not set' });
+
+  const { lat, lng } = req.body;
+  if (lat == null || lng == null) return res.status(400).json({ error: 'lat and lng are required' });
+
+  try {
+    const fetch = (await import('node-fetch')).default;
+    const url = 'https://maps.googleapis.com/maps/api/geocode/json?latlng='
+      + lat + ',' + lng + '&key=' + apiKey;
+
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (data.status !== 'OK' || !data.results.length) {
+      return res.json({ label: null });
+    }
+
+    // Prefer a postcode or neighbourhood component over the full address
+    const result = data.results[0];
+    const components = result.address_components || [];
+
+    const postal   = components.find(c => c.types.includes('postal_code'));
+    const neighbourhood = components.find(c =>
+      c.types.includes('neighborhood') || c.types.includes('sublocality_level_1')
+    );
+    const locality = components.find(c => c.types.includes('locality'));
+
+    const label = (postal && postal.short_name)
+      || (neighbourhood && neighbourhood.long_name)
+      || (locality && locality.long_name)
+      || result.formatted_address;
+
+    res.json({ label });
+  } catch (err) {
+    console.error('Reverse geocode error:', err);
+    res.status(502).json({ error: 'Reverse geocode failed: ' + err.message });
+  }
+});
+
 // ── Anthropic Claude proxy ────────────────────────────────────────────────────
 // POST /api/claude
 // Body: standard Anthropic messages API payload (minus the api key)
