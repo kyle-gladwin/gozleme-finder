@@ -787,18 +787,36 @@ function highlightCard(index) {
   }
 }
 
-function fitMapToBounds(places) {
+function fitMapToBounds(places, searchCentre) {
   if (!mapsApiLoaded || !googleMap) return;
+
+  // places is already sorted by distance — filter to those with coords
   var mapped = places.filter(function(p) { return p.lat != null && p.lng != null; });
   if (!mapped.length) return;
+
+  // Centre on the nearest result
+  var nearest = mapped[0];
+  googleMap.setCenter({ lat: nearest.lat, lng: nearest.lng });
+
   if (mapped.length === 1) {
-    googleMap.setCenter({ lat: mapped[0].lat, lng: mapped[0].lng });
     googleMap.setZoom(15);
     return;
   }
+
+  // Fit to the closest 5 results with coords
+  var nearby = mapped.slice(0, Math.min(5, mapped.length));
   var bounds = new google.maps.LatLngBounds();
-  mapped.forEach(function(p) { bounds.extend({ lat: p.lat, lng: p.lng }); });
-  googleMap.fitBounds(bounds, 40);
+  // Include the search centre itself so the map shows where was searched
+  if (searchCentre) bounds.extend({ lat: searchCentre.lat, lng: searchCentre.lng });
+  nearby.forEach(function(p) { bounds.extend({ lat: p.lat, lng: p.lng }); });
+  googleMap.fitBounds(bounds, { top: 60, right: 40, bottom: 40, left: 40 });
+
+  // Clamp zoom: no tighter than z15 (street), no wider than z12 (borough)
+  google.maps.event.addListenerOnce(googleMap, 'idle', function() {
+    var z = googleMap.getZoom();
+    if (z > 15) googleMap.setZoom(15);
+    if (z < 12) googleMap.setZoom(12);
+  });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -962,6 +980,9 @@ async function searchGozleme() {
     if (b.distance == null) return -1;
     return a.distance - b.distance;
   });
+  if (allPlaces[0] && allPlaces[0].distance != null) {
+    console.log('Nearest result: ' + allPlaces[0].name + ' (' + allPlaces[0].distance.toFixed(2) + 'km)');
+  }
 
   results.classList.add('active');
 
@@ -1038,7 +1059,7 @@ async function searchGozleme() {
   });
 
   // Fit map to all markers
-  fitMapToBounds(allPlaces);
+  fitMapToBounds(allPlaces, searchCentre);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
