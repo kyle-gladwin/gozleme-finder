@@ -589,7 +589,11 @@ async function geocodeAddress(address) {
 // ─────────────────────────────────────────────────────────────────────────────
 var _cachedSpots = null; // in-memory so we only fetch cache.json once per session
 
-async function fetchAiSpots(location, knownNames) {
+// CACHE_RADIUS_KM — how far from the search centre to include cached spots.
+// Matches the 15km radius used by the direct Google Places search.
+var CACHE_RADIUS_KM = 15;
+
+async function fetchAiSpots(location, knownNames, searchCoords) {
   // Load cache once per session
   if (_cachedSpots === null) {
     try {
@@ -604,21 +608,26 @@ async function fetchAiSpots(location, knownNames) {
     }
   }
 
-  // If cache has spots, filter to those relevant to the search location
   if (_cachedSpots.length > 0) {
+    var known = new Set(knownNames.map(function(n) { return n.toLowerCase(); }));
     var locLower = location.toLowerCase();
-    var known    = new Set(knownNames.map(function(n) { return n.toLowerCase(); }));
-
-    // Return spots whose area or address loosely matches the search location,
-    // or all spots if the search is very broad (e.g. "London")
     var isBroadSearch = ['london', 'all', 'everywhere'].some(function(t) { return locLower.includes(t); });
 
     return _cachedSpots
       .filter(function(s) {
-        if (known.has((s.name || '').toLowerCase())) return false; // already in Google results
+        if (known.has((s.name || '').toLowerCase())) return false;
+
+        // Broad search — return everything in the cache
         if (isBroadSearch) return true;
+
+        // If the spot has coordinates and we have a search centre, filter by radius
+        if (searchCoords && s.lat != null && s.lng != null) {
+          var dist = haversineKm(searchCoords.lat, searchCoords.lng, s.lat, s.lng);
+          return dist <= CACHE_RADIUS_KM;
+        }
+
+        // Fall back to string matching for spots without coordinates
         var haystack = ((s.area || '') + ' ' + (s.address || '')).toLowerCase();
-        // Match if any word of the search location appears in the spot's area/address
         return locLower.split(/\s+/).some(function(word) {
           return word.length > 2 && haystack.includes(word);
         });
@@ -886,7 +895,7 @@ async function searchGozleme() {
   // Step 2: Claude AI
   try {
     setStep(2);
-    aiResults = await fetchAiSpots(location, placesResults.map(function(p) { return p.name; }));
+    aiResults = await fetchAiSpots(location, placesResults.map(function(p) { return p.name; }), searchCoordsEarly);
   } catch(e) { errors.push(e.message); }
 
   // Step 3: Geocode AI results + build map
