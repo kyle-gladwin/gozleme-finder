@@ -570,6 +570,14 @@ function extractArea(address) {
 // ─────────────────────────────────────────────────────────────────────────────
 // Geocode proxy (for AI results without coordinates)
 // ─────────────────────────────────────────────────────────────────────────────
+// Bounding box for Greater London + immediate surrounds
+var LONDON_BOUNDS = { minLat: 51.28, maxLat: 51.70, minLng: -0.55, maxLng: 0.35 };
+
+function isInLondon(lat, lng) {
+  return lat >= LONDON_BOUNDS.minLat && lat <= LONDON_BOUNDS.maxLat
+      && lng >= LONDON_BOUNDS.minLng && lng <= LONDON_BOUNDS.maxLng;
+}
+
 async function geocodeAddress(address) {
   try {
     var resp = await fetch('/api/geocode', {
@@ -579,7 +587,14 @@ async function geocodeAddress(address) {
     });
     if (!resp.ok) return null;
     var data = await resp.json();
-    return (data.lat && data.lng) ? { lat: data.lat, lng: data.lng } : null;
+    if (!data.lat || !data.lng) return null;
+    // Reject coordinates outside Greater London to prevent restaurant names
+    // geocoding to wrong cities or countries
+    if (!isInLondon(data.lat, data.lng)) {
+      console.warn('Geocode out of London bounds for "' + address + '": ' + data.lat + ', ' + data.lng);
+      return null;
+    }
+    return { lat: data.lat, lng: data.lng };
   } catch(e) {
     return null;
   }
