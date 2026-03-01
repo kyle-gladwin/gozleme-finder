@@ -77,6 +77,23 @@
   .divider::after { background: linear-gradient(to left, transparent, var(--gold)); }
   .divider span { font-size: 16px; }
 
+  /* ── Source checkboxes ── */
+  .source-checks {
+    display: flex; gap: 16px; flex-wrap: wrap;
+    margin-top: 12px; padding-top: 12px;
+    border-top: 1px solid var(--smoke);
+  }
+  .source-check {
+    display: flex; align-items: center; gap: 6px;
+    font-family: 'DM Mono', monospace; font-size: 10px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--muted); cursor: pointer; user-select: none;
+  }
+  .source-check input[type="checkbox"] {
+    accent-color: var(--terracotta);
+    width: 13px; height: 13px; cursor: pointer;
+  }
+
   /* ── Search ── */
   .search-section {
     background: var(--cream); border: 1px solid var(--smoke); border-radius: 2px;
@@ -298,6 +315,20 @@
         <button class="clear-btn" id="clearBtn" onclick="clearSearch()" title="Clear">&#x2715;</button>
       </div>
       <button class="search-btn" id="searchBtn" onclick="searchGozleme()">Search</button>
+    </div>
+    <div class="source-checks">
+      <label class="source-check">
+        <input type="checkbox" id="chkPlaces" checked> Google Places
+      </label>
+      <label class="source-check">
+        <input type="checkbox" id="chkReviews" checked> Via Reviews
+      </label>
+      <label class="source-check">
+        <input type="checkbox" id="chkCurated" checked> Curated
+      </label>
+      <label class="source-check">
+        <input type="checkbox" id="chkAI" checked> AI Cache
+      </label>
     </div>
   </div>
 
@@ -916,22 +947,28 @@ async function searchGozleme() {
   // Step 1b: Direct gözleme search + searchNearby review-filtered + curated list, in parallel
   try {
     setStep(1);
-    var directSearch  = fetchGooglePlaces('gozleme ' + location, searchCoordsEarly);
-    var reviewSearch  = fetchPlacesByReview(searchCoordsEarly.lat, searchCoordsEarly.lng);
-    var curatedSearch = fetchCuratedSpots();
+    var usePlaces  = document.getElementById('chkPlaces').checked;
+    var useReviews = document.getElementById('chkReviews').checked;
+    var useCurated = document.getElementById('chkCurated').checked;
+    var useAI      = document.getElementById('chkAI').checked;
+    var directSearch  = usePlaces  ? fetchGooglePlaces('gozleme ' + location, searchCoordsEarly) : Promise.resolve([]);
+    var reviewSearch  = useReviews ? fetchPlacesByReview(searchCoordsEarly.lat, searchCoordsEarly.lng) : Promise.resolve([]);
+    var curatedSearch = useCurated ? fetchCuratedSpots() : Promise.resolve([]);
     var step1Results  = await Promise.allSettled([directSearch, reviewSearch, curatedSearch]);
     placesResults  = step1Results[0].status === 'fulfilled' ? step1Results[0].value : [];
     reviewResults  = step1Results[1].status === 'fulfilled' ? step1Results[1].value : [];
     curatedResults = step1Results[2].status === 'fulfilled' ? step1Results[2].value : [];
-    if (step1Results[0].status === 'rejected') errors.push(step1Results[0].reason.message);
-    if (step1Results[1].status === 'rejected') errors.push('Review search: ' + step1Results[1].reason.message);
-    if (step1Results[2].status === 'rejected') errors.push('Curated: ' + step1Results[2].reason.message);
+    if (usePlaces  && step1Results[0].status === 'rejected') errors.push(step1Results[0].reason.message);
+    if (useReviews && step1Results[1].status === 'rejected') errors.push('Review search: ' + step1Results[1].reason.message);
+    if (useCurated && step1Results[2].status === 'rejected') errors.push('Curated: ' + step1Results[2].reason.message);
   } catch(e) { errors.push(e.message); }
 
   // Step 2: Claude AI
   try {
     setStep(2);
-    aiResults = await fetchAiSpots(location, placesResults.map(function(p) { return p.name; }), searchCoordsEarly);
+    if (useAI) {
+      aiResults = await fetchAiSpots(location, placesResults.map(function(p) { return p.name; }), searchCoordsEarly);
+    }
   } catch(e) { errors.push(e.message); }
 
   // Step 3: Geocode AI results + build map

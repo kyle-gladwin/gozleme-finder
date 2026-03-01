@@ -85,10 +85,21 @@ app.post('/api/places', async (req, res) => {
 
   if (!textQuery) return res.status(400).json({ error: 'textQuery is required' });
 
+  // Convert radius (metres) to degree offsets
+  // At lat 51°: 1° lat ≈ 111km, 1° lng ≈ 69km
+  const radiusKm  = parseFloat(radius) / 1000;
+  const latDelta  = radiusKm / 111;
+  const lngDelta  = radiusKm / 69;
+
+  console.log('Places search:', textQuery, '| centre:', latitude, longitude, '| radius:', radiusKm + 'km', '| box:', [latitude - latDelta, longitude - lngDelta, latitude + latDelta, longitude + lngDelta].map(n => n.toFixed(4)).join(', '));
+
   const body = {
     textQuery,
-    locationBias: {
-      circle: { center: { latitude, longitude }, radius: parseFloat(radius) },
+    locationRestriction: {
+      rectangle: {
+        low:  { latitude: latitude - latDelta, longitude: longitude - lngDelta },
+        high: { latitude: latitude + latDelta, longitude: longitude + lngDelta },
+      },
     },
     maxResultCount: Math.min(parseInt(maxResults, 10) || 20, 20),
   };
@@ -333,7 +344,8 @@ app.post('/api/geocode', async (req, res) => {
     const data = await response.json();
 
     if (data.status !== 'OK' || !data.results.length) {
-      return res.status(404).json({ error: 'No geocode result for: ' + address });
+      console.warn('Geocode: no result for "' + address + '" (status: ' + data.status + ')');
+      return res.json({ lat: null, lng: null });
     }
 
     const loc = data.results[0].geometry.location;
