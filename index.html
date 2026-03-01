@@ -900,7 +900,7 @@ async function searchGozleme() {
   // Step 1b: Direct gözleme search + searchNearby review-filtered + curated list, in parallel
   try {
     setStep(1);
-    var directSearch  = fetchGooglePlaces('gozleme ' + location + ' London', searchCoordsEarly);
+    var directSearch  = fetchGooglePlaces('gozleme ' + location, searchCoordsEarly);
     var reviewSearch  = fetchPlacesByReview(searchCoordsEarly.lat, searchCoordsEarly.lng);
     var curatedSearch = fetchCuratedSpots();
     var step1Results  = await Promise.allSettled([directSearch, reviewSearch, curatedSearch]);
