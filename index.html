@@ -444,7 +444,7 @@ function sortPlaces(places) {
 async function loadMapsApi() {
   // Ask server for the Maps key
   try {
-    var r = await fetch('/api/maps-key');
+    var r = await fetch('/gozleme-finder/api/maps-key');
     if (!r.ok) throw new Error('no key');
     var data = await r.json();
     if (!data.key) throw new Error('empty key');
@@ -504,12 +504,21 @@ function mapStyles() {
 // ─────────────────────────────────────────────────────────────────────────────
 async function runDefaultSearch() {
   try {
-    var places = await fetchGooglePlaces('gozleme London');
+    var [cacheResp, curatedResp] = await Promise.all([
+      fetch('/gozleme-finder/api/cached-spots'),
+      fetch('/gozleme-finder/api/curated'),
+    ]);
+
+    var cacheData   = cacheResp.ok   ? await cacheResp.json()   : { spots: [] };
+    var curatedData = curatedResp.ok ? await curatedResp.json() : { spots: [] };
+
+    var spots = [
+      ...(cacheData.spots   || []).map(function(s) { return Object.assign({}, s, { source: 'ai' }); }),
+      ...(curatedData.spots || []).map(function(s) { return Object.assign({}, s, { source: 'curated' }); }),
+    ].filter(function(s) { return s.lat != null && s.lng != null; });
+
     clearMarkers();
-    places.forEach(function(place, i) {
-      addMarker(place, i);
-    });
-    // Don't fit bounds — keep the city-wide view so users can browse
+    spots.forEach(function(place, i) { addMarker(place, i); });
   } catch(e) {
     // Silently fail — user can still search manually
   }
@@ -525,7 +534,7 @@ async function runDefaultSearch() {
 async function fetchGooglePlaces(query, coords) {
   var lat = (coords && coords.lat) ? coords.lat : 51.5074;
   var lng = (coords && coords.lng) ? coords.lng : -0.1278;
-  var resp = await fetch('/api/places', {
+  var resp = await fetch('/gozleme-finder/api/places', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ textQuery: query, latitude: lat, longitude: lng, radius: 15000, maxResults: 20 })
@@ -556,7 +565,7 @@ async function fetchGooglePlaces(query, coords) {
 // Google Places — broad restaurant search filtered by review mentions of gözleme
 // ─────────────────────────────────────────────────────────────────────────────
 async function fetchPlacesByReview(latitude, longitude) {
-  var resp = await fetch('/api/places-by-review', {
+  var resp = await fetch('/gozleme-finder/api/places-by-review', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ latitude: latitude, longitude: longitude, radius: 15000 })
@@ -587,7 +596,7 @@ async function fetchPlacesByReview(latitude, longitude) {
 // Curated spots — manually maintained list from curated.json
 // ─────────────────────────────────────────────────────────────────────────────
 async function fetchCuratedSpots() {
-  var resp = await fetch('/api/curated');
+  var resp = await fetch('/gozleme-finder/api/curated');
   var data = await resp.json();
   if (!resp.ok) throw new Error(data.error || 'Curated spots error');
 
@@ -629,7 +638,7 @@ function isInLondon(lat, lng) {
 
 async function geocodeAddress(address) {
   try {
-    var resp = await fetch('/api/geocode', {
+    var resp = await fetch('/gozleme-finder/api/geocode', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ address: address })
@@ -663,7 +672,7 @@ async function fetchAiSpots(location, knownNames, searchCoords) {
   // Load cache once per session
   if (_cachedSpots === null) {
     try {
-      var cacheResp = await fetch('/api/cached-spots');
+      var cacheResp = await fetch('/gozleme-finder/api/cached-spots');
       var cacheData = await cacheResp.json();
       _cachedSpots = cacheData.spots || [];
       if (_cachedSpots.length > 0 && cacheData.builtAt) {
@@ -717,7 +726,7 @@ async function fetchClaudeLive(location, knownNames) {
     + '\n\nUse only plain ASCII characters in all string values. No apostrophes or special unicode.'
     + '\n\nReturn ONLY a valid JSON array, no markdown. Format:\n[{"name":"...","area":"...","address":"full street address if known","description":"1-2 sentences","tags":["tag1"]}]\n\nUp to 12 results. Only real, confident places.';
 
-  var resp = await fetch('/api/claude', {
+  var resp = await fetch('/gozleme-finder/api/claude', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 2000, messages: [{ role: 'user', content: prompt }] })
@@ -1208,7 +1217,7 @@ function useMyLocation() {
       var lat = pos.coords.latitude;
       var lng = pos.coords.longitude;
       // Reverse geocode to get a human-readable location string
-      fetch('/api/geocode-reverse', {
+      fetch('/gozleme-finder/api/geocode-reverse', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ lat: lat, lng: lng })

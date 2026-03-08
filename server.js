@@ -21,6 +21,7 @@ const fs      = require('fs');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
+const BASE = '/gozleme-finder';
 
 // One key can cover Places API (New), Maps JavaScript API, and Geocoding API
 // if all three are enabled in Google Cloud Console for that key.
@@ -40,15 +41,15 @@ app.use((req, res, next) => {
 app.use(express.json());
 
 // Serve static files
-app.use(express.static(path.join(__dirname)));
+app.use(BASE, express.static(path.join(__dirname)));
 
 // Root → frontend
-app.get('/', (req, res) => {
+app.get(BASE, (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // ── Health check ─────────────────────────────────────────────────────────────
-app.get('/health', (req, res) => {
+app.get(BASE + '/health', (req, res) => {
   res.json({
     status: 'ok',
     googlePlacesKeySet: !!GOOGLE_PLACES_KEY,
@@ -59,7 +60,7 @@ app.get('/health', (req, res) => {
 
 // ── Expose Maps JS key to the browser ────────────────────────────────────────
 // The key is sent at runtime rather than baked into the HTML source.
-app.get('/api/maps-key', (req, res) => {
+app.get(BASE + '/api/maps-key', (req, res) => {
   if (!GOOGLE_MAPS_KEY) {
     return res.status(404).json({ error: 'GOOGLE_MAPS_KEY not configured in .env' });
   }
@@ -69,7 +70,7 @@ app.get('/api/maps-key', (req, res) => {
 // ── Google Places proxy ───────────────────────────────────────────────────────
 // POST /api/places
 // Body: { textQuery, latitude?, longitude?, radius?, maxResults? }
-app.post('/api/places', async (req, res) => {
+app.post(BASE + '/api/places', async (req, res) => {
   const apiKey = GOOGLE_PLACES_KEY;
   if (!apiKey) {
     return res.status(400).json({ error: 'GOOGLE_PLACES_KEY not set in .env' });
@@ -144,7 +145,7 @@ app.post('/api/places', async (req, res) => {
 // category, then filters server-side to those whose reviews mention gözleme.
 // This catches places like Sultan Kitchen that Google doesn't categorise as
 // Turkish but whose customers mention gözleme in reviews.
-app.post('/api/places-by-review', async (req, res) => {
+app.post(BASE + '/api/places-by-review', async (req, res) => {
   const apiKey = GOOGLE_PLACES_KEY;
   if (!apiKey) {
     return res.status(400).json({ error: 'GOOGLE_PLACES_KEY not set in .env' });
@@ -238,7 +239,7 @@ app.post('/api/places-by-review', async (req, res) => {
 // GET /api/cached-spots
 // Serves pre-built AI results from cache.json, filtering out hidden spots.
 // Returns empty array if cache doesn't exist yet.
-app.get('/api/cached-spots', (req, res) => {
+app.get(BASE + '/api/cached-spots', (req, res) => {
   const filePath = path.join(__dirname, 'cache.json');
   try {
     const raw  = fs.readFileSync(filePath, 'utf8');
@@ -254,7 +255,7 @@ app.get('/api/cached-spots', (req, res) => {
 
 // ── Admin — list all cached spots (including hidden) ─────────────────────────
 // GET /api/admin/spots
-app.get('/api/admin/spots', (req, res) => {
+app.get(BASE + '/api/admin/spots', (req, res) => {
   const filePath = path.join(__dirname, 'cache.json');
   try {
     const raw  = fs.readFileSync(filePath, 'utf8');
@@ -269,7 +270,7 @@ app.get('/api/admin/spots', (req, res) => {
 // ── Admin — toggle hidden status of a spot ───────────────────────────────────
 // POST /api/admin/toggle
 // Body: { index: number }  (index into cache.json spots array)
-app.post('/api/admin/toggle', (req, res) => {
+app.post(BASE + '/api/admin/toggle', (req, res) => {
   const filePath = path.join(__dirname, 'cache.json');
   const { index } = req.body;
 
@@ -298,7 +299,7 @@ app.post('/api/admin/toggle', (req, res) => {
 
 // ── Admin UI ──────────────────────────────────────────────────────────────────
 // GET /admin — serves the admin interface
-app.get('/admin', (req, res) => {
+app.get(BASE + '/admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'admin.html'));
 });
 
@@ -306,7 +307,7 @@ app.get('/admin', (req, res) => {
 // GET /api/curated
 // Returns manually curated gözleme spots from curated.json.
 // Edit curated.json to add or remove spots — no server restart needed.
-app.get('/api/curated', (req, res) => {
+app.get(BASE + '/api/curated', (req, res) => {
   const filePath = path.join(__dirname, 'curated.json');
   try {
     const raw  = fs.readFileSync(filePath, 'utf8');
@@ -325,7 +326,7 @@ app.get('/api/curated', (req, res) => {
 // POST /api/geocode
 // Body: { address: string }
 // Returns: { lat, lng } or error
-app.post('/api/geocode', async (req, res) => {
+app.post(BASE + '/api/geocode', async (req, res) => {
   const apiKey = GOOGLE_MAPS_KEY;
   if (!apiKey) {
     return res.status(400).json({ error: 'GOOGLE_MAPS_KEY not set in .env' });
@@ -361,7 +362,7 @@ app.post('/api/geocode', async (req, res) => {
 // POST /api/geocode-reverse
 // Body: { lat, lng }
 // Returns: { label } — a human-readable location name (neighbourhood / postcode)
-app.post('/api/geocode-reverse', async (req, res) => {
+app.post(BASE + '/api/geocode-reverse', async (req, res) => {
   const apiKey = GOOGLE_MAPS_KEY;
   if (!apiKey) return res.status(400).json({ error: 'GOOGLE_MAPS_KEY not set' });
 
@@ -405,7 +406,7 @@ app.post('/api/geocode-reverse', async (req, res) => {
 // ── Anthropic Claude proxy ────────────────────────────────────────────────────
 // POST /api/claude
 // Body: standard Anthropic messages API payload (minus the api key)
-app.post('/api/claude', async (req, res) => {
+app.post(BASE + '/api/claude', async (req, res) => {
   if (!ANTHROPIC_KEY) {
     return res.status(400).json({ error: 'ANTHROPIC_KEY not set in .env' });
   }
