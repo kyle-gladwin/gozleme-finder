@@ -21,7 +21,7 @@ const fs      = require('fs');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
-const BASE = '/gozleme-finder';
+const BASE = '';
 
 // One key can cover Places API (New), Maps JavaScript API, and Geocoding API
 // if all three are enabled in Google Cloud Console for that key.
@@ -41,10 +41,10 @@ app.use((req, res, next) => {
 app.use(express.json());
 
 // Serve static files
-app.use(BASE, express.static(path.join(__dirname)));
+app.use(express.static(path.join(__dirname)));
 
 // Root → frontend
-app.get(BASE, (req, res) => {
+app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 

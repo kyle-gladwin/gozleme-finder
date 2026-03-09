@@ -71,6 +71,27 @@
     margin-left: auto; margin-right: auto; line-height: 1.6;
   }
 
+  .about-trigger {
+    display: inline-block; position: relative;
+    color: #b09a88; cursor: default;
+    border-bottom: 1px dotted #b09a88;
+  }
+  .about-tooltip {
+    display: none; position: absolute;
+    top: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+    background: #3d2b1f; color: #f5ede6;
+    font-size: 12px; font-weight: 400; line-height: 1.6;
+    width: 300px; text-align: left;
+    padding: 10px 14px; border-radius: 6px;
+    pointer-events: none; z-index: 10;
+  }
+  .about-tooltip::after {
+    content: ''; position: absolute;
+    bottom: 100%; left: 50%; transform: translateX(-50%);
+    border: 5px solid transparent; border-bottom-color: #3d2b1f;
+  }
+  .about-trigger:hover .about-tooltip { display: block; }
+
   /* ── Divider ── */
   .divider { display: flex; align-items: center; gap: 12px; margin: 24px 0; }
   .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: linear-gradient(to right, transparent, var(--gold)); }
@@ -322,7 +343,7 @@
 
   <header>
     <h1>Find <em>Gözleme</em><br>Near You</h1>
-    <p class="subtitle">Live results from Google Places combined with AI knowledge, mapped across London.</p>
+    <p class="subtitle">Live results from Google Places combined with AI knowledge, mapped across London. <span class="about-trigger">About this site.<span class="about-tooltip">A friend was in Stoke Newington recently and asked me where he could get Gözleme — the places I knew of had shut down so I started this site so it (hopefully) doesn't happen again.<br><br>The site runs on an Express.js server that proxies Google Places and Maps APIs (for live search and mapping) and the Anthropic Claude API (for AI-curated suggestions). The frontend is plain HTML/JS — no framework. Results are a mix of live Google Places searches, a hand-curated list, and a pre-built AI cache.</span></span></p>
   </header>
 
 
@@ -395,6 +416,10 @@
     Always call ahead to confirm Gözleme is on the menu
   </p>
 
+  <footer class="note" style="padding-top:0;">
+    Created by Kyle Gladwin using Claude Code. See my GitHub <a href="https://github.com/kyle-gladwin/" target="_blank" rel="noopener" style="color:#b09a88;">here</a>.
+  </footer>
+
 </div>
 
 <script>
@@ -444,7 +469,7 @@ function sortPlaces(places) {
 async function loadMapsApi() {
   // Ask server for the Maps key
   try {
-    var r = await fetch('/gozleme-finder/api/maps-key');
+    var r = await fetch('/api/maps-key');
     if (!r.ok) throw new Error('no key');
     var data = await r.json();
     if (!data.key) throw new Error('empty key');
@@ -505,8 +530,8 @@ function mapStyles() {
 async function runDefaultSearch() {
   try {
     var [cacheResp, curatedResp] = await Promise.all([
-      fetch('/gozleme-finder/api/cached-spots'),
-      fetch('/gozleme-finder/api/curated'),
+      fetch('/api/cached-spots'),
+      fetch('/api/curated'),
     ]);
 
     var cacheData   = cacheResp.ok   ? await cacheResp.json()   : { spots: [] };
@@ -534,7 +559,7 @@ async function runDefaultSearch() {
 async function fetchGooglePlaces(query, coords) {
   var lat = (coords && coords.lat) ? coords.lat : 51.5074;
   var lng = (coords && coords.lng) ? coords.lng : -0.1278;
-  var resp = await fetch('/gozleme-finder/api/places', {
+  var resp = await fetch('/api/places', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ textQuery: query, latitude: lat, longitude: lng, radius: 15000, maxResults: 20 })
@@ -565,7 +590,7 @@ async function fetchGooglePlaces(query, coords) {
 // Google Places — broad restaurant search filtered by review mentions of gözleme
 // ─────────────────────────────────────────────────────────────────────────────
 async function fetchPlacesByReview(latitude, longitude) {
-  var resp = await fetch('/gozleme-finder/api/places-by-review', {
+  var resp = await fetch('/api/places-by-review', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ latitude: latitude, longitude: longitude, radius: 15000 })
@@ -596,7 +621,7 @@ async function fetchPlacesByReview(latitude, longitude) {
 // Curated spots — manually maintained list from curated.json
 // ─────────────────────────────────────────────────────────────────────────────
 async function fetchCuratedSpots() {
-  var resp = await fetch('/gozleme-finder/api/curated');
+  var resp = await fetch('/api/curated');
   var data = await resp.json();
   if (!resp.ok) throw new Error(data.error || 'Curated spots error');
 
@@ -638,7 +663,7 @@ function isInLondon(lat, lng) {
 
 async function geocodeAddress(address) {
   try {
-    var resp = await fetch('/gozleme-finder/api/geocode', {
+    var resp = await fetch('/api/geocode', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ address: address })
@@ -672,7 +697,7 @@ async function fetchAiSpots(location, knownNames, searchCoords) {
   // Load cache once per session
   if (_cachedSpots === null) {
     try {
-      var cacheResp = await fetch('/gozleme-finder/api/cached-spots');
+      var cacheResp = await fetch('/api/cached-spots');
       var cacheData = await cacheResp.json();
       _cachedSpots = cacheData.spots || [];
       if (_cachedSpots.length > 0 && cacheData.builtAt) {
@@ -726,7 +751,7 @@ async function fetchClaudeLive(location, knownNames) {
     + '\n\nUse only plain ASCII characters in all string values. No apostrophes or special unicode.'
     + '\n\nReturn ONLY a valid JSON array, no markdown. Format:\n[{"name":"...","area":"...","address":"full street address if known","description":"1-2 sentences","tags":["tag1"]}]\n\nUp to 12 results. Only real, confident places.';
 
-  var resp = await fetch('/gozleme-finder/api/claude', {
+  var resp = await fetch('/api/claude', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 2000, messages: [{ role: 'user', content: prompt }] })
@@ -1217,7 +1242,7 @@ function useMyLocation() {
       var lat = pos.coords.latitude;
       var lng = pos.coords.longitude;
       // Reverse geocode to get a human-readable location string
-      fetch('/gozleme-finder/api/geocode-reverse', {
+      fetch('/api/geocode-reverse', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ lat: lat, lng: lng })

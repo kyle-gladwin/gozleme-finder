@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(lsof -i :3000 2>/dev/null | head -5)",
+      "Bash(npm run dev)",
+      "Bash(kill 31942)",
+      "Bash(git add .)"
+    ]
+  }
+}

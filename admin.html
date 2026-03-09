@@ -239,7 +239,7 @@
       <h1>Gözleme Finder — Admin</h1>
       <p id="cacheDate">Loading cache...</p>
     </div>
-    <a href="/gozleme-finder" class="back-link">← Back to site</a>
+    <a href="/" class="back-link">← Back to site</a>
   </header>
 
   <div class="stats">
@@ -275,7 +275,7 @@ var curFilter = 'all';
 
 async function loadSpots() {
   try {
-    var resp = await fetch('/gozleme-finder/api/admin/spots');
+    var resp = await fetch('/api/admin/spots');
     var data = await resp.json();
 
     if (!resp.ok) throw new Error(data.error || 'Failed to load');
@@ -364,7 +364,7 @@ function renderList() {
 async function toggle(index, btn) {
   btn.disabled = true;
   try {
-    var resp = await fetch('/gozleme-finder/api/admin/toggle', {
+    var resp = await fetch('/api/admin/toggle', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ index: index }),
