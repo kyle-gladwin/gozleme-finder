@@ -42,39 +42,64 @@
   }
 
   .container {
-    max-width: 980px;
-    margin: 0 auto;
     padding: 0 24px;
     position: relative;
     z-index: 1;
   }
 
   /* ── Header ── */
-  header { padding: 48px 0 28px; text-align: center; }
+  header {
+    position: relative;
+    width: 100%;
+    text-align: center;
+    overflow: hidden;
+    padding: 0;
+    margin-top: 32px;
+    margin-bottom: 32px;
+  }
+
+  .header-banner {
+    position: relative;
+    width: 100%;
+    min-height: 180px;
+    display: flex; align-items: center; justify-content: center;
+    background: url('gozleme-banner.png') center 60% / cover no-repeat;
+  }
+
+  .header-banner::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: rgba(10, 5, 2, 0.72);
+  }
+
+  .header-banner-content {
+    position: relative; z-index: 1;
+    padding: 56px 24px 52px;
+  }
 
   .eyebrow {
     font-family: 'DM Mono', monospace;
     font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
-    color: var(--terracotta); margin-bottom: 14px;
+    color: rgba(255,255,255,0.65); margin-bottom: 14px;
   }
 
   h1 {
     font-family: 'Playfair Display', serif;
     font-size: clamp(40px, 7vw, 72px);
-    line-height: 0.95; color: var(--ink);
+    line-height: 0.95; color: #fff;
   }
-  h1 em { font-style: italic; color: var(--terracotta); }
+  h1 em { font-style: italic; color: #e8a87c; }
 
   .subtitle {
-    font-size: 15px; color: #6b5a4a; font-weight: 300;
+    font-size: 15px; color: rgba(255,255,255,0.75); font-weight: 300;
     margin-top: 16px; max-width: 440px;
     margin-left: auto; margin-right: auto; line-height: 1.6;
   }
 
   .about-trigger {
     display: inline-block; position: relative;
-    color: #b09a88; cursor: default;
-    border-bottom: 1px dotted #b09a88;
+    color: rgba(255,255,255,0.6); cursor: default;
+    border-bottom: 1px dotted rgba(255,255,255,0.4);
   }
   .about-tooltip {
     display: none; position: absolute;
@@ -339,17 +364,20 @@
 </style>
 </head>
 <body>
+<header>
+  <div class="header-banner">
+    <div class="header-banner-content">
+      <h1>Find your nearest <em>Gözleme</em><br>in London</h1>
+      <p class="subtitle">Fresh Gozleme whenever you need it. <span class="about-trigger">About this site.<span class="about-tooltip">A friend was in Stoke Newington recently and asked me where he could get Gözleme — the places I knew of had shut down so I started this site so it (hopefully) doesn't happen again.<br><br>The site runs on an Express.js server that proxies Google Places and Maps APIs (for live search and mapping) and the Anthropic Claude API (for AI-curated suggestions). The frontend is plain HTML/JS — no framework. Results are a mix of live Google Places searches, a hand-curated list, and a pre-built AI cache.</span></span></p>
+    </div>
+  </div>
+</header>
+
 <div class="container">
-
-  <header>
-    <h1>Find <em>Gözleme</em><br>Near You</h1>
-    <p class="subtitle">Live results from Google Places combined with AI knowledge, mapped across London. <span class="about-trigger">About this site.<span class="about-tooltip">A friend was in Stoke Newington recently and asked me where he could get Gözleme — the places I knew of had shut down so I started this site so it (hopefully) doesn't happen again.<br><br>The site runs on an Express.js server that proxies Google Places and Maps APIs (for live search and mapping) and the Anthropic Claude API (for AI-curated suggestions). The frontend is plain HTML/JS — no framework. Results are a mix of live Google Places searches, a hand-curated list, and a pre-built AI cache.</span></span></p>
-  </header>
-
 
     <!-- Search -->
   <div class="search-section">
-    <label class="search-label">Search Location</label>
+    <label class="search-label">Search for a location or use current location</label>
     <div class="search-row">
       <div class="search-input-wrap">
         <input type="text" class="search-input" id="locationInput"
@@ -377,8 +405,7 @@
     <p class="loading-text">Searching for Gözleme spots...</p>
     <div class="loading-steps">
       <span class="loading-step" id="step1">1. Querying Google Places...</span>
-      <span class="loading-step" id="step2">2. Asking Claude AI...</span>
-      <span class="loading-step" id="step3">3. Geocoding &amp; building map...</span>
+      <span class="loading-step" id="step2">2. Geocoding &amp; building map...</span>
     </div>
   </div>
 
@@ -412,7 +439,7 @@
   </div>
 
   <p class="note">
-    Google Places results reflect live business data &middot; AI results are from Claude's training knowledge<br>
+    Google Places results reflect live business data<br>
     Always call ahead to confirm Gözleme is on the menu
   </p>
 
@@ -540,10 +567,24 @@ async function runDefaultSearch() {
     var spots = [
       ...(cacheData.spots   || []).map(function(s) { return Object.assign({}, s, { source: 'ai' }); }),
       ...(curatedData.spots || []).map(function(s) { return Object.assign({}, s, { source: 'curated' }); }),
-    ].filter(function(s) { return s.lat != null && s.lng != null; });
+    ];
+
+    // Geocode spots that have no coordinates
+    if (mapsApiLoaded) {
+      var geocodePromises = spots.map(async function(place) {
+        if (place.lat != null) return;
+        var coords = null;
+        if (place.address) coords = await geocodeAddress(place.address);
+        if (!coords && place.name && place.area) coords = await geocodeAddress(place.name + ', ' + place.area);
+        if (!coords && place.name) coords = await geocodeAddress(place.name);
+        if (coords) { place.lat = coords.lat; place.lng = coords.lng; }
+      });
+      await Promise.all(geocodePromises);
+    }
 
     clearMarkers();
-    spots.forEach(function(place, i) { addMarker(place, i); });
+    spots.filter(function(s) { return s.lat != null && s.lng != null; })
+         .forEach(function(place, i) { addMarker(place, i); });
   } catch(e) {
     // Silently fail — user can still search manually
   }
@@ -562,7 +603,7 @@ async function fetchGooglePlaces(query, coords) {
   var resp = await fetch('/api/places', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ textQuery: query, latitude: lat, longitude: lng, radius: 15000, maxResults: 20 })
+    body: JSON.stringify({ textQuery: query, latitude: lat, longitude: lng, radius: 1609, maxResults: 20 })
   });
   var data = await resp.json();
   if (!resp.ok) throw new Error(data.error || 'Google Places proxy error');
@@ -593,7 +634,7 @@ async function fetchPlacesByReview(latitude, longitude) {
   var resp = await fetch('/api/places-by-review', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ latitude: latitude, longitude: longitude, radius: 15000 })
+    body: JSON.stringify({ latitude: latitude, longitude: longitude, radius: 1609 })
   });
   var data = await resp.json();
   if (!resp.ok) throw new Error(data.error || 'Places-by-review proxy error');
@@ -973,7 +1014,7 @@ function escHtml(str) {
 }
 
 function setStep(n) {
-  for (var i = 1; i <= 3; i++) {
+  for (var i = 1; i <= 2; i++) {
     var el = document.getElementById('step' + i);
     if (i < n) el.className = 'loading-step done';
     else if (i === n) el.className = 'loading-step active';
@@ -1011,7 +1052,7 @@ async function searchGozleme() {
   clearMarkers();
   setStep(1);
 
-  var placesResults = [], reviewResults = [], curatedResults = [], aiResults = [], errors = [];
+  var placesResults = [], reviewResults = [], curatedResults = [], errors = [];
 
   // Step 1a: Geocode the search location first so review search uses precise coords
   var searchCoordsEarly = { lat: 51.5074, lng: -0.1278 }; // fallback: central London
@@ -1024,35 +1065,23 @@ async function searchGozleme() {
   // Step 1b: Direct gözleme search + searchNearby review-filtered + curated list, in parallel
   try {
     setStep(1);
-    var usePlaces  = true;
-    var useReviews = true;
-    var useCurated = true;
-    var useAI      = true;
-    var directSearch  = usePlaces  ? fetchGooglePlaces('gozleme ' + location, searchCoordsEarly) : Promise.resolve([]);
-    var reviewSearch  = useReviews ? fetchPlacesByReview(searchCoordsEarly.lat, searchCoordsEarly.lng) : Promise.resolve([]);
-    var curatedSearch = useCurated ? fetchCuratedSpots() : Promise.resolve([]);
+    var directSearch  = fetchGooglePlaces('gozleme near ' + location, searchCoordsEarly);
+    var reviewSearch  = fetchPlacesByReview(searchCoordsEarly.lat, searchCoordsEarly.lng);
+    var curatedSearch = fetchCuratedSpots();
     var step1Results  = await Promise.allSettled([directSearch, reviewSearch, curatedSearch]);
     placesResults  = step1Results[0].status === 'fulfilled' ? step1Results[0].value : [];
     reviewResults  = step1Results[1].status === 'fulfilled' ? step1Results[1].value : [];
     curatedResults = step1Results[2].status === 'fulfilled' ? step1Results[2].value : [];
-    if (usePlaces  && step1Results[0].status === 'rejected') errors.push(step1Results[0].reason.message);
-    if (useReviews && step1Results[1].status === 'rejected') errors.push('Review search: ' + step1Results[1].reason.message);
-    if (useCurated && step1Results[2].status === 'rejected') errors.push('Curated: ' + step1Results[2].reason.message);
+    if (step1Results[0].status === 'rejected') errors.push(step1Results[0].reason.message);
+    if (step1Results[1].status === 'rejected') errors.push('Review search: ' + step1Results[1].reason.message);
+    if (step1Results[2].status === 'rejected') errors.push('Curated: ' + step1Results[2].reason.message);
   } catch(e) { errors.push(e.message); }
 
-  // Step 2: Claude AI
-  try {
-    setStep(2);
-    if (useAI) {
-      aiResults = await fetchAiSpots(location, placesResults.map(function(p) { return p.name; }), searchCoordsEarly);
-    }
-  } catch(e) { errors.push(e.message); }
+  // Step 2: Geocode & build map
+  setStep(2);
 
-  // Step 3: Geocode AI results + build map
-  setStep(3);
-
-  // Merge all three sources: direct Places, review-filtered Places, AI
-  var allPlaces = dedupeAll(placesResults, reviewResults, curatedResults, aiResults);
+  // Merge sources: direct Places, review-filtered Places, curated
+  var allPlaces = dedupeAll(placesResults, reviewResults, curatedResults, []);
 
   // Geocode results that have no coordinates — try address first, fall back to name + area
   if (mapsApiLoaded) {
@@ -1101,6 +1130,11 @@ async function searchGozleme() {
     } else {
       place.distance = null;
     }
+  });
+
+  // Cap at 1 mile (1.60934 km) — drop anything with coords beyond that
+  allPlaces = allPlaces.filter(function(place) {
+    return place.distance == null || place.distance <= 1.60934;
   });
 
   // Sort by distance so _allPlaces[0] is always the closest
