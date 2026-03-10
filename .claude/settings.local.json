@@ -14,7 +14,9 @@
       "Bash(git commit -m \"UI improvements and simplified search logic\")",
       "Bash(git -C /Users/jamiedavies/Downloads/gozlemefiles add .)",
       "Bash(git -C /Users/jamiedavies/Downloads/gozlemefiles commit -m \"add favicon\")",
-      "Bash(git -C /Users/jamiedavies/Downloads/gozlemefiles push)"
+      "Bash(git -C /Users/jamiedavies/Downloads/gozlemefiles push)",
+      "Bash(git -C /Users/jamiedavies/Downloads/gozlemefiles commit -m \"small UI changes\")",
+      "Bash(git -C /Users/jamiedavies/Downloads/gozlemefiles rm README.md)"
     ]
   }
 }
