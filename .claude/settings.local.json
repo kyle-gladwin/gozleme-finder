@@ -16,7 +16,10 @@
       "Bash(git -C /Users/jamiedavies/Downloads/gozlemefiles commit -m \"add favicon\")",
       "Bash(git -C /Users/jamiedavies/Downloads/gozlemefiles push)",
       "Bash(git -C /Users/jamiedavies/Downloads/gozlemefiles commit -m \"small UI changes\")",
-      "Bash(git -C /Users/jamiedavies/Downloads/gozlemefiles rm README.md)"
+      "Bash(git -C /Users/jamiedavies/Downloads/gozlemefiles rm README.md)",
+      "Bash(git -C /Users/jamiedavies/Downloads/gozlemefiles commit -m \"remove readme\")",
+      "Bash(ls /Users/jamiedavies/Downloads/gozlemefiles/*.md 2>/dev/null || echo \"No .md files in root\")",
+      "Bash(git fetch origin && git log origin/main --oneline | head -5)"
     ]
   }
 }
