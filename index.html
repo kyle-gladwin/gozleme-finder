@@ -53,7 +53,6 @@
     position: relative;
     width: 100%;
     text-align: center;
-    overflow: hidden;
     padding: 0;
     margin-top: 32px;
     margin-bottom: 32px;
@@ -74,7 +73,7 @@
   }
 
   .header-banner-content {
-    position: relative; z-index: 1;
+    position: relative; z-index: 9999;
     padding: 56px 24px 52px;
   }
 
@@ -101,6 +100,7 @@
     display: inline-block; position: relative;
     color: rgba(255,255,255,0.6); cursor: default;
     border-bottom: 1px dotted rgba(255,255,255,0.4);
+    z-index: 9999;
   }
   .about-tooltip {
     display: none; position: absolute;
@@ -109,7 +109,7 @@
     font-size: 12px; font-weight: 400; line-height: 1.6;
     width: 300px; text-align: left;
     padding: 10px 14px; border-radius: 6px;
-    pointer-events: none; z-index: 10;
+    pointer-events: none; z-index: 9999;
   }
   .about-tooltip::after {
     content: ''; position: absolute;
@@ -334,7 +334,7 @@
   .source-badge.review { color: var(--accent);      border-color: rgba(42,107,92,0.3);  background: rgba(42,107,92,0.06); }
   .card.source-review::before   { background: var(--accent); }
   .source-badge.curated { color: var(--gold);        border-color: rgba(212,160,23,0.4);  background: rgba(212,160,23,0.08); }
-  .card.source-curated::before  { background: var(--gold); }
+  .card.source-curated::before  { background: var(--places-blue); }
 
   .card-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; min-width: 60px; }
   .card-area { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: #8a7060; text-align: right; }
@@ -404,10 +404,6 @@
   <div class="loading" id="loading">
     <div class="spinner"></div>
     <p class="loading-text">Searching for Gözleme spots...</p>
-    <div class="loading-steps">
-      <span class="loading-step" id="step1">1. Querying Google Places...</span>
-      <span class="loading-step" id="step2">2. Geocoding &amp; building map...</span>
-    </div>
   </div>
 
   <!-- Error -->
@@ -1051,7 +1047,6 @@ async function searchGozleme() {
   error.classList.remove('active');
   cardContainer.innerHTML = '';
   clearMarkers();
-  setStep(1);
 
   var placesResults = [], reviewResults = [], curatedResults = [], errors = [];
 
@@ -1065,7 +1060,6 @@ async function searchGozleme() {
 
   // Step 1b: Direct gözleme search + searchNearby review-filtered + curated list, in parallel
   try {
-    setStep(1);
     var directSearch  = fetchGooglePlaces('gozleme near ' + location, searchCoordsEarly);
     var reviewSearch  = fetchPlacesByReview(searchCoordsEarly.lat, searchCoordsEarly.lng);
     var curatedSearch = fetchCuratedSpots();
@@ -1077,9 +1071,6 @@ async function searchGozleme() {
     if (step1Results[1].status === 'rejected') errors.push('Review search: ' + step1Results[1].reason.message);
     if (step1Results[2].status === 'rejected') errors.push('Curated: ' + step1Results[2].reason.message);
   } catch(e) { errors.push(e.message); }
-
-  // Step 2: Geocode & build map
-  setStep(2);
 
   // Merge sources: direct Places, review-filtered Places, curated
   var allPlaces = dedupeAll(placesResults, reviewResults, curatedResults, []);

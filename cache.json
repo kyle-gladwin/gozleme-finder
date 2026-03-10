@@ -1344,9 +1344,9 @@
     },
     {
       "name": "Sultan Kitchen",
-      "area": "254 Tower Mews",
-      "address": "254 Tower Mews, London E17 7JJ, UK",
-      "description": "",
+      "area": "Walthamstow",
+      "address": "56 Hoe St, Walthamstow, London E17 4PG",
+      "description": "Neighbourhood Turkish kitchen on Hoe Street serving gözleme alongside a full menu of home-cooked Turkish dishes.",
       "tags": [
         "turkish",
         "gozleme"
@@ -1357,7 +1357,7 @@
       "reviewCount": 57,
       "isOpen": false,
       "priceLevel": null,
-      "mapsUrl": "https://maps.google.com/?cid=7230184633264673450&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+      "mapsUrl": "https://www.google.com/maps/place/Sultan+Kitchen/@51.5836958,-0.0197787,19z/data=!3m1!4b1!4m6!3m5!1s0x48761de967559d07:0x6456c69de63a92aa!8m2!3d51.5836958!4d-0.019135!16s%2Fg%2F11g1b1fp8w",
       "placeId": "ChIJB51VZ-kddkgRqpI65p3GVmQ",
       "source": "places",
       "cachedAt": "2026-03-09T22:11:10.256Z"

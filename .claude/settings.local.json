@@ -12,7 +12,9 @@
       "Bash(node -e \"\nconst data = JSON.parse\\(require\\('fs'\\).readFileSync\\('cache.json'\\)\\);\nconst spots = data.spots.filter\\(s => s.source === 'places'\\);\n\n// Check names for obvious non-gozleme indicators\nconst suspicious = spots.filter\\(s => {\n  const n = s.name.toLowerCase\\(\\);\n  const hasGozleme = n.includes\\('gozleme'\\) || n.includes\\('gözleme'\\);\n  return !hasGozleme;\n}\\);\n\nconst withGozleme = spots.length - suspicious.length;\nconsole.log\\('Places spots total:', spots.length\\);\nconsole.log\\('Has gozleme in name:', withGozleme\\);\nconsole.log\\('No gozleme in name:', suspicious.length, '\\(' + Math.round\\(suspicious.length/spots.length*100\\) + '%\\)'\\);\n\n// Show a broader sample of suspicious ones\nconsole.log\\('\\\\nSample of spots WITHOUT gozleme in the name:'\\);\nsuspicious.slice\\(0, 60\\).forEach\\(\\(s,i\\) => console.log\\(i+1+'.', s.name\\)\\);\n\")",
       "Bash(node -e \"\nconst fs = require\\('fs'\\);\nconst data = JSON.parse\\(fs.readFileSync\\('cache.json'\\)\\);\nconst before = data.spots.length;\ndata.spots = data.spots.filter\\(s => s.source === 'places'\\);\ndata.totalSpots = data.spots.length;\ndata.builtAt = new Date\\(\\).toISOString\\(\\);\nfs.writeFileSync\\('cache.json', JSON.stringify\\(data, null, 2\\)\\);\nconsole.log\\('Removed ' + \\(before - data.spots.length\\) + ' AI spots, kept ' + data.spots.length + ' Places spots'\\);\n\")",
       "Bash(git commit -m \"UI improvements and simplified search logic\")",
-      "Bash(git -C /Users/jamiedavies/Downloads/gozlemefiles add .)"
+      "Bash(git -C /Users/jamiedavies/Downloads/gozlemefiles add .)",
+      "Bash(git -C /Users/jamiedavies/Downloads/gozlemefiles commit -m \"add favicon\")",
+      "Bash(git -C /Users/jamiedavies/Downloads/gozlemefiles push)"
     ]
   }
 }

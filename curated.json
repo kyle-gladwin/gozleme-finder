@@ -5,8 +5,10 @@
     "area": "Walthamstow",
     "lat": 51.5837,
     "lng": -0.0194,
-    "description": "Neighbourhood Turkish kitchen on Hoe Street serving gözleme alongside a full menu of home-cooked Turkish dishes.",
     "tags": ["turkish", "gozleme", "walthamstow"],
-    "mapsUrl": "https://www.google.com/maps/place/Sultan+Kitchen/@51.5837148,-0.0194669,92m/"
+    "rating": 4.3,
+    "reviewCount": 57,
+    "priceLevel": null,
+    "mapsUrl": "https://www.google.com/maps/place/Sultan+Kitchen/@51.5836958,-0.0197787,19z/data=!3m1!4b1!4m6!3m5!1s0x48761de967559d07:0x6456c69de63a92aa!8m2!3d51.5836958!4d-0.019135!16s%2Fg%2F11g1b1fp8w"
   }
 ]
