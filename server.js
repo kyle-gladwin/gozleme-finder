@@ -28,6 +28,7 @@ const BASE = '';
 const GOOGLE_PLACES_KEY = process.env.GOOGLE_PLACES_KEY || '';
 const GOOGLE_MAPS_KEY   = process.env.GOOGLE_MAPS_KEY   || GOOGLE_PLACES_KEY;
 const ANTHROPIC_KEY     = process.env.ANTHROPIC_KEY     || '';
+const ADMIN_PASSWORD    = process.env.ADMIN_PASSWORD    || '';
 
 // ── Middleware ──────────────────────────────────────────────────────────────
 app.use(cors());
@@ -253,9 +254,26 @@ app.get(BASE + '/api/cached-spots', (req, res) => {
   }
 });
 
+// ── Admin auth middleware ─────────────────────────────────────────────────────
+function requireAdminAuth(req, res, next) {
+  if (!ADMIN_PASSWORD) return next(); // no password set — open access
+
+  const auth = req.headers['authorization'] || '';
+  const [scheme, encoded] = auth.split(' ');
+
+  if (scheme === 'Basic' && encoded) {
+    const decoded = Buffer.from(encoded, 'base64').toString('utf8');
+    const password = decoded.split(':').slice(1).join(':'); // ignore username
+    if (password === ADMIN_PASSWORD) return next();
+  }
+
+  res.set('WWW-Authenticate', 'Basic realm="Admin"');
+  return res.status(401).send('Unauthorized');
+}
+
 // ── Admin — list all cached spots (including hidden) ─────────────────────────
 // GET /api/admin/spots
-app.get(BASE + '/api/admin/spots', (req, res) => {
+app.get(BASE + '/api/admin/spots', requireAdminAuth, (req, res) => {
   const filePath = path.join(__dirname, 'cache.json');
   try {
     const raw  = fs.readFileSync(filePath, 'utf8');
@@ -270,7 +288,7 @@ app.get(BASE + '/api/admin/spots', (req, res) => {
 // ── Admin — toggle hidden status of a spot ───────────────────────────────────
 // POST /api/admin/toggle
 // Body: { index: number }  (index into cache.json spots array)
-app.post(BASE + '/api/admin/toggle', (req, res) => {
+app.post(BASE + '/api/admin/toggle', requireAdminAuth, (req, res) => {
   const filePath = path.join(__dirname, 'cache.json');
   const { index } = req.body;
 
@@ -299,7 +317,7 @@ app.post(BASE + '/api/admin/toggle', (req, res) => {
 
 // ── Admin UI ──────────────────────────────────────────────────────────────────
 // GET /admin — serves the admin interface
-app.get(BASE + '/admin', (req, res) => {
+app.get(BASE + '/admin', requireAdminAuth, (req, res) => {
   res.sendFile(path.join(__dirname, 'admin.html'));
 });
 

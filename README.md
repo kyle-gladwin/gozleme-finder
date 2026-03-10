@@ -9,7 +9,7 @@ A web app for finding gözleme (Turkish stuffed flatbread) spots in London. Comb
 - **AI cache** — pre-built list of spots discovered by Claude AI across London
 - **Curated spots** — hand-verified locations maintained by the creator
 - **Interactive map** — Google Maps with pins, info windows, and distance sorting
-- **Admin panel** — toggle spot visibility without editing files directly
+- **Admin panel** — password-protected panel to toggle spot visibility
 
 ## Tech Stack
 
@@ -30,6 +30,7 @@ Create a `.env` file in the project root:
 ```env
 GOOGLE_PLACES_KEY=your_google_api_key
 ANTHROPIC_KEY=your_anthropic_api_key
+ADMIN_PASSWORD=your_admin_password     # required to access /admin
 GOOGLE_MAPS_KEY=your_google_maps_key   # optional, falls back to GOOGLE_PLACES_KEY
 PORT=3000                               # optional, defaults to 3000
 ```
